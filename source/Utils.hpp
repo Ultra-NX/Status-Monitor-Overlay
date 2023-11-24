@@ -149,6 +149,10 @@ Handle remoteSharedMemory = 1;
 uint32_t realCPU_Hz = 0;
 uint32_t realGPU_Hz = 0;
 uint32_t realRAM_Hz = 0;
+uint32_t realCPU_mV = 0;
+uint32_t realGPU_mV = 0;
+uint32_t realRAM_mV = 0;
+uint32_t realSOC_mV = 0;
 uint32_t ramLoad[SysClkRamLoad_EnumMax];
 
 void LoadSharedMemory() {
@@ -398,6 +402,10 @@ void Misc(void*) {
 				realCPU_Hz = sysclkCTX.realFreqs[SysClkModule_CPU];
 				realGPU_Hz = sysclkCTX.realFreqs[SysClkModule_GPU];
 				realRAM_Hz = sysclkCTX.realFreqs[SysClkModule_MEM];
+				realCPU_mV = sysclkCTX.realVolts[0];
+				realGPU_mV = sysclkCTX.realVolts[1];
+				realRAM_mV = sysclkCTX.realVolts[2];
+				realSOC_mV = sysclkCTX.realVolts[3];
 				ramLoad[SysClkRamLoad_All] = sysclkCTX.ramLoad[SysClkRamLoad_All];
 				ramLoad[SysClkRamLoad_Cpu] = sysclkCTX.ramLoad[SysClkRamLoad_Cpu];
 			}
