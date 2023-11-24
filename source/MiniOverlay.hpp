@@ -173,6 +173,7 @@ public:
 						strcat(print_text, "\n");
 					strcat(print_text, "FPS");
 					entry_count++;
+					entry_count++;
 					flags |= (1 << 6);
 				}
 			}
@@ -339,7 +340,7 @@ public:
 		if (batTimeEstimate >= 0) {
 			snprintf(remainingBatteryLife, sizeof remainingBatteryLife, "%d:%02d", batTimeEstimate / 60, batTimeEstimate % 60);
 		}
-		else snprintf(remainingBatteryLife, sizeof remainingBatteryLife, "-:--");
+		else snprintf(remainingBatteryLife, sizeof remainingBatteryLife, "--:--");
 		
 		snprintf(SoCPCB_temperature_c, sizeof SoCPCB_temperature_c, "%0.2fW[%s]", PowerConsumption, remainingBatteryLife);
 		if (hosversionAtLeast(10,0,0)) {
@@ -426,8 +427,11 @@ public:
 				if (Temp[0]) {
 					strcat(Temp, "\n");
 				}
-				char Temp_s[8] = "";
+				char Temp_s[24] = "";
 				snprintf(Temp_s, sizeof(Temp_s), "%2.1f", FPSavg);
+				strcat(Temp, Temp_s);
+				strcat(Temp, "\n");
+				snprintf(Temp_s, sizeof(Temp_s), "Min:%2.1f - Max:%2.1f", FPSmin, FPSmax);
 				strcat(Temp, Temp_s);
 				flags |= 1 << 6;			
 			}
@@ -450,6 +454,10 @@ public:
 			TeslaFPS = 60;
 			tsl::goBack();
 			return true;
+		}
+		if ((keysHeld & KEY_L) && (keysHeld & KEY_ZL)) {
+			FPSmin = 254;
+			FPSmax = 0;
 		}
 		if (keysHeld & KEY_B) {
 			return false;
