@@ -18,6 +18,10 @@ private:
 	char batteryCharge[10]; // Declare the batteryCharge variable
 	char FPS_var_compressed_c[64];
 	char Battery_c[32];
+	char CPU_volt_c[10];
+	char GPU_volt_c[10];
+	char RAM_volt_c[16];
+	char SOC_volt_c[10];
 
 	uint32_t margin = 8;
 
@@ -155,6 +159,10 @@ public:
 					uint32_t offset_s = offset + dimensions_s.first + margin;
 					renderer->drawString(CPU_compressed_c, false, offset_s, base_y+fontsize, fontsize, renderer->a(settings.textColor));
 					offset += CPU_dimensions.first + margin;
+					if (settings.realVolts) {
+						auto dimensions_v = renderer->drawString(" | 4444mV", false, 0, fontsize, fontsize, renderer->a(0x0000));
+						offset += dimensions_v.first + margin;
+					}
 					flags |= 1 << 1;
 				}
 				else if (!key.compare("GPU") && !(flags & 1 << 2)) {
@@ -162,6 +170,10 @@ public:
 					uint32_t offset_s = offset + dimensions_s.first + margin;
 					renderer->drawString(GPU_Load_c, false, offset_s, base_y+fontsize, fontsize, renderer->a(settings.textColor));
 					offset += GPU_dimensions.first + margin;
+					if (settings.realVolts) {
+						auto dimensions_v = renderer->drawString(" | 4444mV", false, 0, fontsize, fontsize, renderer->a(0x0000));
+						offset += dimensions_v.first + margin;
+					}
 					flags |= 1 << 2;
 				}
 				else if (!key.compare("RAM") && !(flags & 1 << 3)) {
@@ -169,6 +181,10 @@ public:
 					uint32_t offset_s = offset + dimensions_s.first + margin;
 					renderer->drawString(RAM_var_compressed_c, false, offset_s, base_y+fontsize, fontsize, renderer->a(settings.textColor));
 					offset += RAM_dimensions.first + margin;
+					if (settings.realVolts) {
+						auto dimensions_v = renderer->drawString(" | 4444/4444mV", false, 0, fontsize, fontsize, renderer->a(0x0000));
+						offset += dimensions_v.first + margin;
+					}
 					flags |= 1 << 3;
 				}
 				else if (!key.compare("BRD") && !(flags & 1 << 4)) {
@@ -176,6 +192,10 @@ public:
 					uint32_t offset_s = offset + dimensions_s.first + margin;
 					renderer->drawString(skin_temperature_c, false, offset_s, base_y+fontsize, fontsize, renderer->a(settings.textColor));
 					offset += BRD_dimensions.first + margin;
+					if (settings.realVolts) {
+						auto dimensions_v = renderer->drawString(" | 4444mV", false, 0, fontsize, fontsize, renderer->a(0x0000));
+						offset += dimensions_v.first + margin;
+					}
 					flags |= 1 << 4;
 				}
 				else if (!key.compare("PWR") && !(flags & 1 << 5)) {
@@ -255,6 +275,10 @@ public:
 				CPU_Usage0, 
 				"@", 
 				realCPU_Hz / 1000000, (realCPU_Hz / 100000) % 10);
+			if (settings.realVolts) {
+				snprintf(CPU_volt_c, sizeof CPU_volt_c, " | %dmV", realCPU_mV);
+				strncat(CPU_compressed_c, CPU_volt_c, sizeof CPU_compressed_c);
+			}
 		}
 		else {
 			snprintf(CPU_compressed_c, sizeof CPU_compressed_c, 
@@ -262,6 +286,10 @@ public:
 				CPU_Usage0,
 				"@", 
 				CPU_Hz / 1000000, (CPU_Hz / 100000) % 10);
+			if (settings.realVolts) {
+				snprintf(CPU_volt_c, sizeof CPU_volt_c, " | %dmV", realCPU_mV);
+				strncat(CPU_compressed_c, CPU_volt_c, sizeof CPU_compressed_c);
+			}
 		}
 		
 		///GPU
@@ -289,6 +317,10 @@ public:
 				GPU_Load_u / 10, GPU_Load_u % 10, 
 				"@", 
 				realGPU_Hz / 1000000, (realGPU_Hz / 100000) % 10);
+			if (settings.realVolts) {
+				snprintf(GPU_volt_c, sizeof GPU_volt_c, " | %dmV", realGPU_mV);
+				strncat(GPU_Load_c, GPU_volt_c, sizeof GPU_Load_c);
+			}
 		}
 		else {
 			snprintf(GPU_Load_c, sizeof GPU_Load_c, 
@@ -296,6 +328,10 @@ public:
 				GPU_Load_u / 10, GPU_Load_u % 10, 
 				"@",
 				GPU_Hz / 1000000, (GPU_Hz / 100000) % 10);
+			if (settings.realVolts) {
+				snprintf(GPU_volt_c, sizeof GPU_volt_c, " | %dmV", realGPU_mV);
+				strncat(GPU_Load_c, GPU_volt_c, sizeof GPU_Load_c);
+			}
 		}
 		
 		///RAM
@@ -339,11 +375,19 @@ public:
 			snprintf(RAM_var_compressed_c, sizeof RAM_var_compressed_c, 
 				"%s%s%d.%d", 
 				MICRO_RAM_all_c, "@", realRAM_Hz / 1000000, (realRAM_Hz / 100000) % 10);
+			if (settings.realVolts) {
+				snprintf(RAM_volt_c, sizeof RAM_volt_c, " | %d/%dmV", realRAM_mV/10000, realRAM_mV%10000);
+				strncat(RAM_var_compressed_c, RAM_volt_c, sizeof RAM_var_compressed_c);
+			}
 		}
 		else {
 			 snprintf(RAM_var_compressed_c, sizeof RAM_var_compressed_c, 
 				"%s%s%d.%d", 
 				MICRO_RAM_all_c, "@", RAM_Hz / 1000000, (RAM_Hz / 1000000) % 10);
+			if (settings.realVolts) {
+				snprintf(RAM_volt_c, sizeof RAM_volt_c, " | %d/%dmV", realRAM_mV/10000, realRAM_mV%10000);
+				strncat(RAM_var_compressed_c, RAM_volt_c, sizeof RAM_var_compressed_c);
+			}
 		}
 		
 		char remainingBatteryLife[8];
@@ -361,12 +405,20 @@ public:
 				"%2.1f\u00B0C(%2.0f%%)", 
 				SOC_temperatureF,
 				Rotation_SpeedLevel_f * 100);
+			if (settings.realVolts) {
+				snprintf(SOC_volt_c, sizeof SOC_volt_c, " | %dmV", realSOC_mV);
+				strncat(skin_temperature_c, SOC_volt_c, sizeof skin_temperature_c);
+			}
 		}
 		else {
 			snprintf(skin_temperature_c, sizeof skin_temperature_c, 
 				"%hu.%hhu\u00B0C(%2.0f%%)", 
 				SOC_temperatureC / 1000, (SOC_temperatureC / 100) % 10, 
 				Rotation_SpeedLevel_f * 100);
+			if (settings.realVolts) {
+				snprintf(SOC_volt_c, sizeof SOC_volt_c, " | %dmV", realSOC_mV);
+				strncat(skin_temperature_c, SOC_volt_c, sizeof skin_temperature_c);
+			}
 		}
 		
 		

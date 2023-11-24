@@ -897,6 +897,7 @@ struct MiniSettings {
 struct MicroSettings {
 	uint8_t refreshRate;
 	bool realFrequencies;
+	bool realVolts;
 	size_t handheldFontSize;
 	size_t dockedFontSize;
 	uint8_t alignTo;
@@ -1055,6 +1056,7 @@ void GetConfigSettings(MiniSettings* settings) {
 
 void GetConfigSettings(MicroSettings* settings) {
 	settings -> realFrequencies = false;
+	settings -> realVolts = false;
 	settings -> handheldFontSize = 18;
 	settings -> dockedFontSize = 18;
 	settings -> alignTo = 1;
@@ -1099,6 +1101,11 @@ void GetConfigSettings(MicroSettings* settings) {
 		key = parsedData["micro"]["real_freqs"];
 		convertToUpper(key);
 		settings -> realFrequencies = !(key.compare("TRUE"));
+	}
+	if (parsedData["micro"].find("real_volts") != parsedData["micro"].end()) {
+		key = parsedData["micro"]["real_volts"];
+		convertToUpper(key);
+		settings -> realVolts = !(key.compare("TRUE"));
 	}
 	if (parsedData["micro"].find("text_align") != parsedData["micro"].end()) {
 		key = parsedData["micro"]["text_align"];
