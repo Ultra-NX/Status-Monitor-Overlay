@@ -876,6 +876,7 @@ struct FullSettings {
 struct MiniSettings {
 	uint8_t refreshRate;
 	bool realFrequencies;
+	bool realVolts;
 	size_t handheldFontSize;
 	size_t dockedFontSize;
 	uint16_t backgroundColor;
@@ -925,12 +926,13 @@ struct FpsGraphSettings {
 
 void GetConfigSettings(MiniSettings* settings) {
 	settings -> realFrequencies = false;
+	settings -> realVolts = true;
 	settings -> handheldFontSize = 15;
 	settings -> dockedFontSize = 15;
 	convertStrToRGBA4444("#1117", &(settings -> backgroundColor));
 	convertStrToRGBA4444("#FFFF", &(settings -> catColor));
 	convertStrToRGBA4444("#FFFF", &(settings -> textColor));
-	settings -> show = "CPU+GPU+RAM+TEMP+DRAW+FAN+FPS";
+	settings -> show = "CPU+GPU+RAM+DRAW+TEMP+FAN+FPS";
 	settings -> showRAMLoad = true;
 	settings -> refreshRate = 1;
 
@@ -967,6 +969,11 @@ void GetConfigSettings(MiniSettings* settings) {
 		key = parsedData["mini"]["real_freqs"];
 		convertToUpper(key);
 		settings -> realFrequencies = !(key.compare("TRUE"));
+	}
+	if (parsedData["mini"].find("real_volts") != parsedData["mini"].end()) {
+		key = parsedData["mini"]["real_volts"];
+		convertToUpper(key);
+		settings -> realVolts = !(key.compare("TRUE"));
 	}
 
 	long maxFontSize = 22;
