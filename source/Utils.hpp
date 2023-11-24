@@ -1063,7 +1063,7 @@ void GetConfigSettings(MicroSettings* settings) {
 	convertStrToRGBA4444("#1117", &(settings -> backgroundColor));
 	convertStrToRGBA4444("#FCCF", &(settings -> catColor));
 	convertStrToRGBA4444("#FFFF", &(settings -> textColor));
-	settings -> show = "CPU+GPU+RAM+BRD+FAN+FPS";
+	settings -> show = "FPS+CPU+GPU+RAM+BRD+FAN+BAT";
 	settings -> showRAMLoad = true;
 	settings -> setPosBottom = false;
 	settings -> refreshRate = 1;
