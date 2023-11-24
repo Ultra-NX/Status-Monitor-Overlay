@@ -136,6 +136,8 @@ uintptr_t FPSavgaddress = 0;
 uint64_t PID = 0;
 uint32_t FPS = 0xFE;
 float FPSavg = 254;
+float FPSmin = 254;
+float FPSmax = 0;
 SharedMemory _sharedmemory = {};
 bool SharedMemoryUsed = false;
 uint32_t* MAGIC_shared = 0;
@@ -456,10 +458,15 @@ void Misc(void*) {
 			if (SharedMemoryUsed) {
 				FPS = *FPS_shared;
 				FPSavg = 19'200'000.f / (std::accumulate<uint32_t*, float>(FPSticks_shared, FPSticks_shared+10, 0) / 10);
+				if (FPSavg > FPSmax)	FPSmax = FPSavg;
+				if (FPSavg < FPSmin)	FPSmin = FPSavg;
 			}
 		}
-		else FPSavg = 254;
-		
+		else {
+			FPSavg = 254;
+			FPSmin = 254;
+			FPSmax = 0;
+		}
 		// Interval
 		svcSleepThread(100'000'000);
 	}
