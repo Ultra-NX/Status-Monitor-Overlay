@@ -984,7 +984,7 @@ void GetConfigSettings(MiniSettings* settings) {
 		settings -> realVolts = !(key.compare("TRUE"));
 	}
 
-	long maxFontSize = 22;
+	long maxFontSize = 32;
 	long minFontSize = 8;
 	if (parsedData["mini"].find("handheld_font_size") != parsedData["mini"].end()) {
 		key = parsedData["mini"]["handheld_font_size"];
@@ -1120,7 +1120,7 @@ void GetConfigSettings(MicroSettings* settings) {
 			settings -> alignTo = 2;
 		}
 	}
-	long maxFontSize = 18;
+	long maxFontSize = 28;
 	long minFontSize = 8;
 	if (parsedData["micro"].find("handheld_font_size") != parsedData["micro"].end()) {
 		key = parsedData["micro"]["handheld_font_size"];

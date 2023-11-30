@@ -16,7 +16,7 @@ public:
     GraphsMenu() {}
 
     virtual tsl::elm::Element* createUI() override {
-		rootFrame = new tsl::elm::OverlayFrame("Status Monitor", "Graphs");
+		rootFrame = new tsl::elm::OverlayFrame("Ultra Monitor", "Graphs");
 		auto list = new tsl::elm::List();
 
 		auto comFPSGraph = new tsl::elm::ListItem("FPS");
@@ -52,7 +52,7 @@ public:
     OtherMenu() { }
 
     virtual tsl::elm::Element* createUI() override {
-		rootFrame = new tsl::elm::OverlayFrame("Status Monitor", "Other");
+		rootFrame = new tsl::elm::OverlayFrame("Ultra Monitor", "Other");
 		auto list = new tsl::elm::List();
 
 		auto Battery = new tsl::elm::ListItem("Battery/Charger");
@@ -104,7 +104,7 @@ public:
     MainMenu() {}
 
     virtual tsl::elm::Element* createUI() override {
-		rootFrame = new tsl::elm::OverlayFrame("Status Monitor", APP_VERSION);
+		rootFrame = new tsl::elm::OverlayFrame("Ultra Monitor", APP_VERSION);
 		auto list = new tsl::elm::List();
 		
 		auto Full = new tsl::elm::ListItem("Full");
@@ -134,11 +134,11 @@ public:
 			filepath = folderpath + filename;
 		}
 		else {
-			test = fopen(std::string(folderpath + "Status-Monitor-Overlay.ovl").c_str(), "rb");
+			test = fopen(std::string(folderpath + "Ultra-Status-Monitor.ovl").c_str(), "rb");
 			if (test) {
 				fclose(test);
 				fileExist = true;
-				filepath = folderpath + "Status-Monitor-Overlay.ovl";
+				filepath = folderpath + "Ultra-Status-Monitor.ovl";
 			}
 		}
 		if (fileExist) {
@@ -370,10 +370,10 @@ int main(int argc, char **argv) {
 				filepath = folderpath + filename;
 			}
 			else {
-				test = fopen(std::string(folderpath + "Status-Monitor-Overlay.ovl").c_str(), "rb");
+				test = fopen(std::string(folderpath + "Ultra-Status-Monitor.ovl").c_str(), "rb");
 				if (test) {
 					fclose(test);
-					filepath = folderpath + "Status-Monitor-Overlay.ovl";
+					filepath = folderpath + "Ultra-Status-Monitor.ovl";
 				}
 			}
 			return tsl::loop<MicroMode>(argc, argv);
@@ -387,10 +387,10 @@ int main(int argc, char **argv) {
 				filepath = folderpath + filename;
 			}
 			else {
-				test = fopen(std::string(folderpath + "Status-Monitor-Overlay.ovl").c_str(), "rb");
+				test = fopen(std::string(folderpath + "Ultra-Status-Monitor.ovl").c_str(), "rb");
 				if (test) {
 					fclose(test);
-					filepath = folderpath + "Status-Monitor-Overlay.ovl";
+					filepath = folderpath + "Ultra-Status-Monitor.ovl";
 				}
 			}
 			return tsl::loop<MicroMode>(argc, argv);
