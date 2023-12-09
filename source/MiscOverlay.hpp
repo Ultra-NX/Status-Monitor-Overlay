@@ -21,8 +21,9 @@ private:
 	char NVENC_Hz_c[18];
 	char NVJPG_Hz_c[18];
 	char Nifm_pass[96];
+	char Nifm_ipaddr[16];
 public:
-    MiscOverlay() { 
+	MiscOverlay() { 
 		smInitialize();
 		nifmCheck = nifmInitialize(NifmServiceType_Admin);
 		if (R_SUCCEEDED(mmuInitialize())) {
@@ -51,7 +52,7 @@ public:
 		audsnoopExit();
 	}
 
-    virtual tsl::elm::Element* createUI() override {
+	virtual tsl::elm::Element* createUI() override {
 		rootFrame = new tsl::elm::OverlayFrame("Ultra Monitor", APP_VERSION);
 
 		auto Status = new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, u16 x, u16 y, u16 w, u16 h) {
@@ -81,12 +82,16 @@ public:
 							if (Nifm_showpass)
 								renderer->drawString(Nifm_pass, false, 20, 305, 15, renderer->a(0xFFFF));
 							else
-								renderer->drawString("Press Y to show password", false, 20, 305, 15, renderer->a(0xFFFF));
+								renderer->drawString("Hold Y to show password", false, 20, 305, 15, renderer->a(0xFFFF));
 						}
 					}
 					else if (NifmConnectionType == NifmInternetConnectionType_Ethernet)
 						renderer->drawString("Type: Ethernet", false, 20, 280, 18, renderer->a(0xFFFF));
+					
+					renderer->drawString("IP Address:", false, 20, 320, 15, renderer->a(0xFFFF));
+					renderer->drawString(Nifm_ipaddr, false, 104, 320, 15, renderer->a(0xFFFF));
 				}
+
 				else
 					renderer->drawString("Type: Not connected", false, 20, 280, 18, renderer->a(0xFFFF));
 		}
@@ -107,6 +112,8 @@ public:
 		char pass_temp1[25] = "";
 		char pass_temp2[25] = "";
 		char pass_temp3[17] = "";
+		u32 ipaddr_value = 0;
+		unsigned char ipaddr[4] = "";
 		if (Nifm_profile.wireless_setting_data.passphrase_len > 48) {
 			memcpy(&pass_temp1, &(Nifm_profile.wireless_setting_data.passphrase[0]), 24);
 			memcpy(&pass_temp2, &(Nifm_profile.wireless_setting_data.passphrase[24]), 24);
@@ -119,7 +126,15 @@ public:
 		else {
 			memcpy(&pass_temp1, &(Nifm_profile.wireless_setting_data.passphrase[0]), 24);
 		}
-		snprintf(Nifm_pass, sizeof Nifm_pass, "%s\n%s\n%s", pass_temp1, pass_temp2, pass_temp3);	
+		snprintf(Nifm_pass, sizeof Nifm_pass, "%s\n%s\n%s", pass_temp1, pass_temp2, pass_temp3);
+		if (!ipaddr_value || ipaddr[0] == '\0') {
+			nifmGetCurrentIpAddress(&ipaddr_value);
+			ipaddr[0] = (ipaddr_value >> 24) & 0xFF;
+			ipaddr[1] = (ipaddr_value >> 16) & 0xFF;
+			ipaddr[2] = (ipaddr_value >> 8) & 0xFF;
+			ipaddr[3] = ipaddr_value & 0xFF;
+		}
+		snprintf(Nifm_ipaddr, sizeof Nifm_ipaddr, "%u.%u.%u.%u", ipaddr[3], ipaddr[2], ipaddr[1], ipaddr[0]);	
 	}
 
 	virtual bool handleInput(uint64_t keysDown, uint64_t keysHeld, touchPosition touchInput, JoystickPosition leftJoyStick, JoystickPosition rightJoyStick) override {
