@@ -16,10 +16,10 @@ public:
     GraphsMenu() {}
 
     virtual tsl::elm::Element* createUI() override {
-		rootFrame = new tsl::elm::OverlayFrame("Ultra Monitor", "Graphs");
+		rootFrame = new tsl::elm::OverlayFrame("Ultra Monitor", "FPS");
 		auto list = new tsl::elm::List();
 
-		auto comFPSGraph = new tsl::elm::ListItem("FPS");
+		auto comFPSGraph = new tsl::elm::ListItem("Graph");
 		comFPSGraph->setClickListener([](uint64_t keys) {
 			if (keys & KEY_A) {
 				tsl::changeTo<com_FPSGraph>();
@@ -28,6 +28,16 @@ public:
 			return false;
 		});
 		list->addItem(comFPSGraph);
+
+		auto comFPSCounter = new tsl::elm::ListItem("Counter");
+		comFPSCounter->setClickListener([](uint64_t keys) {
+			if (keys & KEY_A) {
+				tsl::changeTo<com_FPS>();
+				return true;
+			}
+			return false;
+		});
+		list->addItem(comFPSCounter);
 
 		rootFrame->setContent(list);
 
@@ -154,16 +164,7 @@ public:
 			list->addItem(Micro);
 		}
 		if (SaltySD) {
-			auto comFPS = new tsl::elm::ListItem("FPS Counter");
-			comFPS->setClickListener([](uint64_t keys) {
-				if (keys & KEY_A) {
-					tsl::changeTo<com_FPS>();
-					return true;
-				}
-				return false;
-			});
-			list->addItem(comFPS);
-			auto Graphs = new tsl::elm::ListItem("Graphs");
+			auto Graphs = new tsl::elm::ListItem("FPS");
 			Graphs->setClickListener([](uint64_t keys) {
 				if (keys & KEY_A) {
 					tsl::changeTo<GraphsMenu>();
