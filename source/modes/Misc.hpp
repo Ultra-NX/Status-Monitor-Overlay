@@ -1,7 +1,3 @@
-#pragma once
-#include <tesla.hpp>
-#include "common.hpp"
-
 void StartMiscThread() {
 	threadCreate(&t0, Misc2, NULL, NULL, 0x1000, 0x3F, 3);
 	threadStart(&t0);
@@ -23,7 +19,7 @@ private:
 	char Nifm_pass[96];
 	char Nifm_ipaddr[16];
 public:
-	MiscOverlay() { 
+    MiscOverlay() { 
 		smInitialize();
 		nifmCheck = nifmInitialize(NifmServiceType_Admin);
 		if (R_SUCCEEDED(mmuInitialize())) {
@@ -52,8 +48,8 @@ public:
 		audsnoopExit();
 	}
 
-	virtual tsl::elm::Element* createUI() override {
-		rootFrame = new tsl::elm::OverlayFrame("Ultra Monitor", APP_VERSION);
+    virtual tsl::elm::Element* createUI() override {
+		rootFrame = new tsl::elm::OverlayFrame("Status Monitor", APP_VERSION);
 
 		auto Status = new tsl::elm::CustomDrawer([this](tsl::gfx::Renderer *renderer, u16 x, u16 y, u16 w, u16 h) {
 			
@@ -91,7 +87,6 @@ public:
 					renderer->drawString("IP Address:", false, 20, 320, 15, renderer->a(0xFFFF));
 					renderer->drawString(Nifm_ipaddr, false, 104, 320, 15, renderer->a(0xFFFF));
 				}
-
 				else
 					renderer->drawString("Type: Not connected", false, 20, 280, 18, renderer->a(0xFFFF));
 		}
@@ -126,7 +121,7 @@ public:
 		else {
 			memcpy(&pass_temp1, &(Nifm_profile.wireless_setting_data.passphrase[0]), 24);
 		}
-		snprintf(Nifm_pass, sizeof Nifm_pass, "%s\n%s\n%s", pass_temp1, pass_temp2, pass_temp3);
+		snprintf(Nifm_pass, sizeof Nifm_pass, "%s\n%s\n%s", pass_temp1, pass_temp2, pass_temp3);	
 		if (!ipaddr_value || ipaddr[0] == '\0') {
 			nifmGetCurrentIpAddress(&ipaddr_value);
 			ipaddr[0] = (ipaddr_value >> 24) & 0xFF;
@@ -134,7 +129,7 @@ public:
 			ipaddr[2] = (ipaddr_value >> 8) & 0xFF;
 			ipaddr[3] = ipaddr_value & 0xFF;
 		}
-		snprintf(Nifm_ipaddr, sizeof Nifm_ipaddr, "%u.%u.%u.%u", ipaddr[3], ipaddr[2], ipaddr[1], ipaddr[0]);	
+		snprintf(Nifm_ipaddr, sizeof Nifm_ipaddr, "%u.%u.%u.%u", ipaddr[3], ipaddr[2], ipaddr[1], ipaddr[0]);
 	}
 
 	virtual bool handleInput(uint64_t keysDown, uint64_t keysHeld, touchPosition touchInput, JoystickPosition leftJoyStick, JoystickPosition rightJoyStick) override {
@@ -143,13 +138,9 @@ public:
 		}
 		else Nifm_showpass = false;
 
-		if (keysHeld & KEY_B) {
-			returningFromSelection = true;
+		if (keysDown & KEY_B) {
 			tsl::goBack();
 			return true;
-		}
-		if (keysHeld & KEY_B) {
-			return false;
 		}
 		return false;
 	}

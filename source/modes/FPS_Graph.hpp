@@ -1,11 +1,6 @@
-#pragma once
-#include <tesla.hpp>
-#include "common.hpp"
-
-//FPS Graph mode
 class com_FPSGraph : public tsl::Gui {
 private:
-	std::list<HidNpadButton> mappedButtons = buttonMapper.MapButtons(keyCombo); // map buttons
+	uint64_t mappedButtons = MapButtons(keyCombo); // map buttons
 	char FPSavg_c[8];
 	FpsGraphSettings settings;
 public:
@@ -184,17 +179,7 @@ public:
 		
 	}
 	virtual bool handleInput(uint64_t keysDown, uint64_t keysHeld, touchPosition touchInput, JoystickPosition leftJoyStick, JoystickPosition rightJoyStick) override {
-
-		bool allButtonsHeld = true;
-		for (const HidNpadButton& button : mappedButtons) {
-			if (!(keysHeld & static_cast<uint64_t>(button))) {
-				allButtonsHeld = false;
-				break;
-			}
-		}
-
-		if (allButtonsHeld) {
-			returningFromSelection = true;
+		if (isKeyComboPressed(keysHeld, keysDown, mappedButtons)) {
 			TeslaFPS = 60;
 			tsl::goBack();
 			return true;

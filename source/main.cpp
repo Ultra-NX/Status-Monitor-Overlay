@@ -2,13 +2,16 @@
 #include <tesla.hpp>
 #include "Utils.hpp"
 
-#include "FullOverlay.hpp"
-#include "MiniOverlay.hpp"
-#include "MicroOverlay.hpp"
-#include "FPSCounterOverlay.hpp"
-#include "FPSGraphOverlay.hpp"
-#include "BatteryOverlay.hpp"
-#include "MiscOverlay.hpp"
+static tsl::elm::OverlayFrame* rootFrame = nullptr;
+static bool skipMain = false;
+
+#include "modes/FPS_Counter.hpp"
+#include "modes/FPS_Graph.hpp"
+#include "modes/Full.hpp"
+#include "modes/Mini.hpp"
+#include "modes/Micro.hpp"
+#include "modes/Battery.hpp"
+#include "modes/Misc.hpp"
 
 //Graphs
 class GraphsMenu : public tsl::Gui {
@@ -16,7 +19,7 @@ public:
     GraphsMenu() {}
 
     virtual tsl::elm::Element* createUI() override {
-		rootFrame = new tsl::elm::OverlayFrame("Ultra Monitor", "FPS");
+		rootFrame = new tsl::elm::OverlayFrame("Status Monitor", "FPS");
 		auto list = new tsl::elm::List();
 
 		auto comFPSGraph = new tsl::elm::ListItem("Graph");
@@ -47,8 +50,7 @@ public:
 	virtual void update() override {}
 
 	virtual bool handleInput(uint64_t keysDown, uint64_t keysHeld, touchPosition touchInput, JoystickPosition leftJoyStick, JoystickPosition rightJoyStick) override {
-		if (keysHeld & KEY_B) {
-			returningFromSelection = true;
+		if (keysDown & KEY_B) {
 			tsl::goBack();
 			return true;
 		}
@@ -93,16 +95,9 @@ public:
 	virtual void update() override {}
 
 	virtual bool handleInput(uint64_t keysDown, uint64_t keysHeld, touchPosition touchInput, JoystickPosition leftJoyStick, JoystickPosition rightJoyStick) override {
-		if (!returningFromSelection && (keysHeld & KEY_B)) {
-			returningFromSelection = true;
+		if (keysDown & KEY_B) {
 			tsl::goBack();
 			return true;
-		}
-		if (returningFromSelection && !(keysHeld & KEY_B)) {
-			returningFromSelection = false;
-		}
-		if (keysHeld & KEY_B) {
-			return false;
 		}
 		return false;
 	}
@@ -196,15 +191,9 @@ public:
 	}
 
 	virtual bool handleInput(uint64_t keysDown, uint64_t keysHeld, touchPosition touchInput, JoystickPosition leftJoyStick, JoystickPosition rightJoyStick) override {
-		if (!returningFromSelection && (keysHeld & KEY_B)) {
+		if (keysDown & KEY_B) {
 			tsl::goBack();
 			return true;
-		}
-		if (returningFromSelection && !(keysHeld & KEY_B)) {
-			returningFromSelection = false;
-		}
-		if (keysHeld & KEY_B) {
-			return false;
 		}
 		return false;
 	}
@@ -216,11 +205,11 @@ public:
 	virtual void initServices() override {
 		//Initialize services
 		tsl::hlp::doWithSmSession([this]{
-			
+
 			apmInitialize();
 			if (hosversionAtLeast(8,0,0)) clkrstCheck = clkrstInitialize();
 			else pcvCheck = pcvInitialize();
-			
+
 			tsCheck = tsInitialize();
 			if (hosversionAtLeast(5,0,0)) tcCheck = tcInitialize();
 
@@ -234,18 +223,18 @@ public:
 			psmCheck = psmInitialize();
 			if (R_SUCCEEDED(psmCheck)) {
 				psmService = psmGetServiceSession();
-				i2cInitialize();
 			}
-			
+			i2cInitialize();
+
 			SaltySD = CheckPort();
-			
+
 			if (SaltySD) {
 				LoadSharedMemory();
 			}
 			if (sysclkIpcRunning() && R_SUCCEEDED(sysclkIpcInitialize())) {
 				uint32_t sysClkApiVer = 0;
 				sysclkIpcGetAPIVersion(&sysClkApiVer);
-				if (sysClkApiVer != 4) {
+				if (sysClkApiVer < 4) {
 					sysclkIpcExit();
 				}
 				else sysclkCheck = 0;
@@ -267,11 +256,10 @@ public:
 		tcExit();
 		fanControllerClose(&g_ICon);
 		fanExit();
-		nvMapExit();
 		nvClose(fd);
 		nvExit();
-		i2cExit();
 		psmExit();
+		i2cExit();
 		apmExit();
 	}
 
@@ -289,11 +277,10 @@ public:
 	virtual void initServices() override {
 		//Initialize services
 		tsl::hlp::doWithSmSession([this]{
-			
 			apmInitialize();
 			if (hosversionAtLeast(8,0,0)) clkrstCheck = clkrstInitialize();
 			else pcvCheck = pcvInitialize();
-			
+
 			if (R_SUCCEEDED(nvInitialize())) nvCheck = nvOpen(&fd, "/dev/nvhost-ctrl-gpu");
 
 			tsCheck = tsInitialize();
@@ -304,21 +291,22 @@ public:
 				else fanCheck = fanOpenController(&g_ICon, 1);
 			}
 
+			i2cInitialize();
+
 			psmCheck = psmInitialize();
 			if (R_SUCCEEDED(psmCheck)) {
 				psmService = psmGetServiceSession();
-				i2cInitialize();
 			}
-			
+
 			SaltySD = CheckPort();
-			
+
 			if (SaltySD) {
 				LoadSharedMemory();
 			}
 			if (sysclkIpcRunning() && R_SUCCEEDED(sysclkIpcInitialize())) {
 				uint32_t sysClkApiVer = 0;
 				sysclkIpcGetAPIVersion(&sysClkApiVer);
-				if (sysClkApiVer != 4) {
+				if (sysClkApiVer < 4) {
 					sysclkIpcExit();
 				}
 				else sysclkCheck = 0;
@@ -330,6 +318,9 @@ public:
 	virtual void exitServices() override {
 		CloseThreads();
 		shmemClose(&_sharedmemory);
+		if (R_SUCCEEDED(sysclkCheck)) {
+			sysclkIpcExit();
+		}
 		//Exit services
 		clkrstExit();
 		pcvExit();

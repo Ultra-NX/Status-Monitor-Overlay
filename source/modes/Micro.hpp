@@ -1,27 +1,22 @@
-#pragma once
-#include <tesla.hpp>
-#include "common.hpp"
-
-//Micro mode
 class MicroOverlay : public tsl::Gui {
 private:
-	std::list<HidNpadButton> mappedButtons = buttonMapper.MapButtons(keyCombo); // map buttons
-	char GPU_Load_c[32];
-	char Rotation_SpeedLevel_c[64];
-	char Power_c[64];
-	char RAM_var_compressed_c[128];
-	char CPU_compressed_c[160];
-	char CPUS_compressed_c[160];
-	char CPU_Usage[32];
-	char CPU_Usage0[32];
-	char CPU_Usage1[32];
-	char CPU_Usage2[32];
-	char CPU_Usage3[32];
-	char skin_temperature_c[48];
-	char skin_temperatureB_c[48];
-	char skin_temperatureS_c[48];
-	char batteryCharge[10]; // Declare the batteryCharge variable
-	char FPS_var_compressed_c[64];
+	uint64_t mappedButtons = MapButtons(keyCombo); // map buttons
+	char GPU_Load_c[32] = "";
+	char Rotation_SpeedLevel_c[64] = "";
+	char RAM_var_compressed_c[128] = "";
+	char Power_c[64] = "";
+	char CPU_compressed_c[160] = "";
+	char CPUS_compressed_c[160] = "";
+	char CPU_Usage[32] = "";
+	char CPU_Usage0[32] = "";
+	char CPU_Usage1[32] = "";
+	char CPU_Usage2[32] = "";
+	char CPU_Usage3[32] = "";
+	char skin_temperature_c[48] = "";
+	char skin_temperatureB_c[48] = "";
+	char skin_temperatureS_c[48] = "";
+	char batteryCharge[10] = ""; // Declare the batteryCharge variable
+	char FPS_var_compressed_c[64] = "";
 	char Battery_c[32];
 	char BatteryS_c[32];
 	char CPU_volt_c[10];
@@ -51,6 +46,7 @@ private:
 	ApmPerformanceMode performanceMode = ApmPerformanceMode_Invalid;
 	size_t fontsize = 0;
 	bool showFPS = false;
+	uint64_t systemtickfrequency_impl = systemtickfrequency;
 public:
     MicroOverlay() { 
 		GetConfigSettings(&settings);
@@ -64,11 +60,13 @@ public:
 		if (settings.setPosBottom) {
 			tsl::gfx::Renderer::getRenderer().setLayerPos(0, 1038);
 		}
-		StartThreads();
+		mutexInit(&mutex_BatteryChecker);
+		mutexInit(&mutex_Misc);
 		TeslaFPS = settings.refreshRate;
-		systemtickfrequency /= settings.refreshRate;
+		systemtickfrequency_impl /= settings.refreshRate;
 		alphabackground = 0x0;
 		deactivateOriginalFooter = true;
+        StartThreads();
 	}
 	~MicroOverlay() {
 		CloseThreads();
@@ -343,16 +341,30 @@ public:
 				fontsize = settings.dockedFontSize;
 			}
 		}
-		//In case of getting more than systemtickfrequency in idle, make it equal to systemtickfrequency to get 0% as output and nothing less
-		//This is because making each loop also takes time, which is not considered because this will take also additional time
-		if (idletick0 > systemtickfrequency) idletick0 = systemtickfrequency;
-		if (idletick1 > systemtickfrequency) idletick1 = systemtickfrequency;
-		if (idletick2 > systemtickfrequency) idletick2 = systemtickfrequency;
-		if (idletick3 > systemtickfrequency) idletick3 = systemtickfrequency;
-		double cpu_usage0 = (1.d - ((double)idletick0 / systemtickfrequency)) * 100;
-		double cpu_usage1 = (1.d - ((double)idletick1 / systemtickfrequency)) * 100;
-		double cpu_usage2 = (1.d - ((double)idletick2 / systemtickfrequency)) * 100;
-		double cpu_usage3 = (1.d - ((double)idletick3 / systemtickfrequency)) * 100;
+
+		//Make stuff ready to print
+		///CPU
+		/* if (idletick0 > systemtickfrequency_impl)
+			strcpy(CPU_Usage0, "0%");
+		else snprintf(CPU_Usage0, sizeof CPU_Usage0, "%.0f%%", (1.d - ((double)idletick0 / systemtickfrequency_impl)) * 100);
+		if (idletick1 > systemtickfrequency_impl)
+			strcpy(CPU_Usage1, "0%");
+		else snprintf(CPU_Usage1, sizeof CPU_Usage1, "%.0f%%", (1.d - ((double)idletick1 / systemtickfrequency_impl)) * 100);
+		if (idletick2 > systemtickfrequency_impl)
+			strcpy(CPU_Usage2, "0%");
+		else snprintf(CPU_Usage2, sizeof CPU_Usage2, "%.0f%%", (1.d - ((double)idletick2 / systemtickfrequency_impl)) * 100);
+		if (idletick3 > systemtickfrequency_impl)
+			strcpy(CPU_Usage3, "0%");
+		else snprintf(CPU_Usage3, sizeof CPU_Usage3, "%.0f%%", (1.d - ((double)idletick3 / systemtickfrequency_impl)) * 100); */
+
+		if (idletick0 > systemtickfrequency_impl) idletick0 = systemtickfrequency_impl;
+		if (idletick1 > systemtickfrequency_impl) idletick1 = systemtickfrequency_impl;
+		if (idletick2 > systemtickfrequency_impl) idletick2 = systemtickfrequency_impl;
+		if (idletick3 > systemtickfrequency_impl) idletick3 = systemtickfrequency_impl;
+		double cpu_usage0 = (1.d - ((double)idletick0 / systemtickfrequency_impl)) * 100;
+		double cpu_usage1 = (1.d - ((double)idletick1 / systemtickfrequency_impl)) * 100;
+		double cpu_usage2 = (1.d - ((double)idletick2 / systemtickfrequency_impl)) * 100;
+		double cpu_usage3 = (1.d - ((double)idletick3 / systemtickfrequency_impl)) * 100;
 		double cpu_usageM = 0;
 		if (cpu_usage0 > cpu_usageM)	cpu_usageM = cpu_usage0;
 		if (cpu_usage1 > cpu_usageM)	cpu_usageM = cpu_usage1;
@@ -367,6 +379,7 @@ public:
 		snprintf(CPU_Usage2, sizeof CPU_Usage2, "%.0f%%", (1.d - ((double)idletick2 / systemtickfrequency)) * 100);
 		snprintf(CPU_Usage3, sizeof CPU_Usage3, "%.0f%%", (1.d - ((double)idletick3 / systemtickfrequency)) * 100);
 
+		mutexLock(&mutex_Misc);
 		char difference[5] = "@";
 		if (realCPU_Hz) {
 			int32_t deltaCPU = (int32_t)(realCPU_Hz / 1000) - (CPU_Hz / 1000);
@@ -380,7 +393,6 @@ public:
 				strcpy(difference, "▽");
 			}
 		}
-		
 		if (settings.realVolts) {
 			if (settings.realFrequencies && realCPU_Hz) {
 				snprintf(CPU_compressed_c, sizeof CPU_compressed_c, 
@@ -542,6 +554,7 @@ public:
 		
 		///Battery
 		char remainingBatteryLife[8];
+		mutexLock(&mutex_BatteryChecker);
 		if (batTimeEstimate >= 0) {
 			snprintf(remainingBatteryLife, sizeof remainingBatteryLife, "%d:%02d", batTimeEstimate / 60, batTimeEstimate % 60);
 		}
@@ -639,31 +652,21 @@ public:
 					Rotation_SpeedLevel_f * 100);
 			}
 		}
+		mutexUnlock(&mutex_BatteryChecker);
 		
 		snprintf(Rotation_SpeedLevel_c, sizeof Rotation_SpeedLevel_c, "%2.1f%%", Rotation_SpeedLevel_f * 100);
 
 
 		///FPS
 		snprintf(FPS_var_compressed_c, sizeof FPS_var_compressed_c, "%2.1f", FPSavg);
+
+		mutexUnlock(&mutex_Misc);
 		
 		
 		
 	}
 	virtual bool handleInput(uint64_t keysDown, uint64_t keysHeld, touchPosition touchInput, JoystickPosition leftJoyStick, JoystickPosition rightJoyStick) override {
-		//std::list<HidNpadButton> mappedButtons;
-		//ButtonMapperImpl buttonMapper; // Create an instance of the ButtonMapperImpl class
-		//mappedButtons = buttonMapper.MapButtons(keyCombo); // map buttons
-		
-		bool allButtonsHeld = true;
-		for (const HidNpadButton& button : mappedButtons) {
-			if (!(keysHeld & static_cast<uint64_t>(button))) {
-				allButtonsHeld = false;
-				break;
-			}
-		}
-
-		if (allButtonsHeld) {
-			returningFromSelection = true;
+		if (isKeyComboPressed(keysHeld, keysDown, mappedButtons)) {
 			TeslaFPS = 60;
             if (skipMain)
                 tsl::goBack();
@@ -672,9 +675,6 @@ public:
 			    tsl::Overlay::get()->close();
             }
 			return true;
-		}
-		if (keysHeld & KEY_B) {
-			return false;
 		}
 		return false;
 	}
