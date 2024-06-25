@@ -54,9 +54,7 @@ public:
 		if (performanceMode == ApmPerformanceMode_Normal) {
 			fontsize = settings.handheldFontSize;
 		}
-		else if (performanceMode == ApmPerformanceMode_Boost) {
-			fontsize = settings.dockedFontSize;
-		}
+		else fontsize = settings.dockedFontSize;
 		if (settings.setPosBottom) {
 			tsl::gfx::Renderer::getRenderer().setLayerPos(0, 1038);
 		}

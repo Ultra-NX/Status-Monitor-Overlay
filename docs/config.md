@@ -11,7 +11,7 @@ Colors are provided in RGBA4444 format, which means that each character represen
 
 | Key | Explanation | Possible values | Default Value |
 |-----|-------------|-----------------|---------------|
-| `key_combo` | Buttons combination that allows exiting Full, Mini and Micro modes; max 4 buttons, otherwise next buttons will be ignored. Combine different buttons with `+` | `A`, `B`, `X`, `Y`, `L`, `R`, `ZL`, `ZR`, `PLUS`, `MINUS`, `DUP`, `DDOWN`, `DLEFT`, `DRIGHT`, `SL`, `SR`, `LSTICK`, `RSTICK`, `UP`, `DOWN`, `LEFT`, `RIGHT` | `L+DDOWN+RSTICK` |
+| `key_combo` | Buttons combination that allows exiting Full, Mini, Micro, FPS Graph and FPS Counter modes; max 4 buttons, otherwise next buttons will be ignored. Combine different buttons with `+` | `A`, `B`, `X`, `Y`, `L`, `R`, `ZL`, `ZR`, `PLUS`, `MINUS`, `DUP`, `DDOWN`, `DLEFT`, `DRIGHT`, `SL`, `SR`, `LSTICK`, `RSTICK`, `UP`, `DOWN`, `LEFT`, `RIGHT` | `L+DDOWN+RSTICK` |
 | `battery_avg_iir_filter` | Read voltage + current averages directly from fuel gauge, that uses infinite impulse response filter | `true`, `false` | `false` |
 | `battery_time_left_refreshrate` | How many seconds must pass to refresh Battery Remaining Time | from `1` to `60` | `60` |
 
@@ -50,6 +50,7 @@ Colors are provided in RGBA4444 format, which means that each character represen
 | `layer_height_align` | On which side of the screen Y axis you want this mode | `top`, `bottom` | `top` |
 | `handheld_font_size` | How big should be rendered text in handheld mode | From `8` to `18` | `18` |
 | `docked_font_size` | How big should be rendered text in docked mode | From `8` to `18` | `18` |
+| `text_align` | How shown text should be aligned | `left`, `center`, `right`| `center` |
 | `real_freqs` | This works only if you have sys-clk 2.0.0_rc4+ installed. It shows real frequencies for CPU, GPU and RAM instead of target frequencies | `true`, `false` | `false` |
 | `show` | Which data should be rendered. Connect different stats with `+` in any order. | `CPU`, `GPU`, `RAM`, `BRD`, `FAN`, `FPS` | `CPU+GPU+RAM+BRD+FAN+FPS` |
 | `replace_GB_with_RAM_load` | This works only if you have sys-clk 2.0.0_rc4+ installed. Instead of RAM total usage it shows RAM load. | `true`, `false` | `true` |
@@ -82,5 +83,5 @@ Colors are provided in RGBA4444 format, which means that each character represen
 | `border_color` | Color of rectangle in RGBA4444 format | From `#0000` to `#FFFF` | `#F77F` |
 | `dashed_line_color` | Color of dashed line at the center of rectangle in RGBA4444 format | From `#0000` to `#FFFF` | `#8888` |
 | `main_line_color` | Color of line representing FPS value on graph in RGBA4444 format | From `#0000` to `#FFFF` | `#FFFF` |
-| `rounded_line_color` | Color of line representing FPS value on graph if it's divisble by 10 in RGBA4444 format | From `#0000` to `#FFFF` | `#0C0F` |
-| `perfect_line_color` | Color of line representing FPS value on graph if it's divisble by 30 in RGBA4444 format | From `#0000` to `#FFFF` | `#F0FF` |
+| `rounded_line_color` | Color of line representing FPS value on graph if it's divisble by 10 in RGBA4444 format | From `#0000` to `#FFFF` | `#F0FF` |
+| `perfect_line_color` | Color of line representing FPS value on graph if it's divisble by 30 in RGBA4444 format | From `#0000` to `#FFFF` | `#0C0F` |

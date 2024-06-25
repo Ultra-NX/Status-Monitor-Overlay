@@ -158,6 +158,21 @@ uint32_t realGPU_mV = 0;
 uint32_t realRAM_mV = 0;
 uint32_t realSOC_mV = 0;
 uint32_t ramLoad[SysClkRamLoad_EnumMax];
+uint8_t refreshRate = 0;
+
+void LoadSharedMemoryAndRefreshRate() {
+	if (SaltySD_Connect())
+		return;
+
+	SaltySD_GetSharedMemoryHandle(&remoteSharedMemory);
+	SaltySD_GetDisplayRefreshRate(&refreshRate);
+	SaltySD_Term();
+
+	shmemLoadRemote(&_sharedmemory, remoteSharedMemory, 0x1000, Perm_Rw);
+	if (!shmemMap(&_sharedmemory))
+		SharedMemoryUsed = true;
+	else FPS = 1234;
+}
 
 void LoadSharedMemory() {
 	if (SaltySD_Connect())
@@ -463,7 +478,7 @@ void Misc(void*) {
 		}
 		// Interval
 		mutexUnlock(&mutex_Misc);
-		svcSleepThread(100'000'000);
+		svcSleepThread(TeslaFPS < 10 ? (1'000'000'000 / TeslaFPS) : 100'000'000);
 	}
 }
 
@@ -647,7 +662,9 @@ void formatButtonCombination(std::string& line) {
 		{"PLUS", "\uE0EF"},
 		{"MINUS", "\uE0F0"},
 		{"LSTICK", "\uE104"},
-		{"RSTICK", "\uE105"}
+		{"RSTICK", "\uE105"},
+		{"RS", "\uE105"},
+		{"LS", "\uE104"}
 	};
 	// Remove all spaces from the line
 	line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
@@ -708,10 +725,12 @@ uint64_t MapButtons(const std::string& buttonCombo) {
 		{"SR", HidNpadButton_AnySR},
 		{"LSTICK", HidNpadButton_StickL},
 		{"RSTICK", HidNpadButton_StickR},
-		{"UP", HidNpadButton_Up},
-		{"DOWN", HidNpadButton_Down},
-		{"LEFT", HidNpadButton_Left},
-		{"RIGHT", HidNpadButton_Right}
+		{"LS", HidNpadButton_StickL},
+		{"RS", HidNpadButton_StickR},
+		{"UP", HidNpadButton_AnyUp},
+		{"DOWN", HidNpadButton_AnyDown},
+		{"LEFT", HidNpadButton_AnyLeft},
+		{"RIGHT", HidNpadButton_AnyRight}
 	};
 
 	uint64_t comboBitmask = 0;
@@ -947,7 +966,7 @@ void GetConfigSettings(MiniSettings* settings) {
 	convertStrToRGBA4444("#1117", &(settings -> backgroundColor));
 	convertStrToRGBA4444("#FFFF", &(settings -> catColor));
 	convertStrToRGBA4444("#FFFF", &(settings -> textColor));
-	settings -> show = "CPU+GPU+RAM+DRAW+TEMP+FAN+FPS";
+	settings -> show = "CPU+GPU+RAM+TEMP+DRAW+FAN+FPS";
 	settings -> showRAMLoad = true;
 	settings -> refreshRate = 1;
 
@@ -991,7 +1010,7 @@ void GetConfigSettings(MiniSettings* settings) {
 		settings -> realVolts = !(key.compare("TRUE")); 
 	}
 
-	long maxFontSize = 32;
+	long maxFontSize = 22;
 	long minFontSize = 8;
 	if (parsedData["mini"].find("handheld_font_size") != parsedData["mini"].end()) {
 		key = parsedData["mini"]["handheld_font_size"];
@@ -1127,7 +1146,7 @@ void GetConfigSettings(MicroSettings* settings) {
 			settings -> alignTo = 2;
 		}
 	}
-	long maxFontSize = 28;
+	long maxFontSize = 18;
 	long minFontSize = 8;
 	if (parsedData["micro"].find("handheld_font_size") != parsedData["micro"].end()) {
 		key = parsedData["micro"]["handheld_font_size"];
