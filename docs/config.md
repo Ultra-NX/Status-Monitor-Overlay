@@ -25,6 +25,8 @@ Colors are provided in RGBA4444 format, which means that each character represen
 | `show_real_freqs` | This works only if you have sys-clk 2.0.0_rc4+ installed. Show real frequencies for CPU, GPU and RAM | `false`, `true` | `true` |
 | `show_deltas` | This works only if you have sys-clk 2.0.0_rc4+ installed. Show difference for CPU, GPU and RAM between target frequencies and real frequencies. They are not showed if both keys `show_real_freqs` and `show_target_freqs` are set to `false` | `false`, `true` | `true` |
 | `show_target_freqs` | Show target frequencies for CPU, GPU and RAM | `false`, `true` | `true` |
+| `show_fps` | Show game's FPS and PFPS | `false`, `true` | `true` |
+| `show_res` | Show game's 2 best candidates for internal resolution, it won't show when game is not using NVN | `false`, `true` | `true` |
 
 > [mini]
 
@@ -36,7 +38,7 @@ Colors are provided in RGBA4444 format, which means that each character represen
 | `handheld_font_size` | How big should be rendered text in handheld mode | From `8` to `22` | `15` |
 | `docked_font_size` | How big should be rendered text in docked mode | From `8` to `22` | `15` |
 | `real_freqs` | This works only if you have sys-clk 2.0.0_rc4+ installed. It shows real frequencies for CPU, GPU and RAM instead of target frequencies | `true`, `false` | `false` |
-| `show` | Which data should be rendered. Connect different stats with `+` in any order. | `CPU`, `GPU`, `RAM`, `TEMP`, `FAN`, `DRAW`, `FPS` | `CPU+GPU+RAM+TEMP+FAN+DRAW+FPS` |
+| `show` | Which data should be rendered. Connect different stats with `+` in any order. | `CPU`, `GPU`, `RAM`, `TEMP`, `FAN`, `DRAW`, `FPS`, `RES` | `CPU+GPU+RAM+TEMP+FAN+DRAW+FPS+RES` |
 | `replace_MB_with_RAM_load` | This works only if you have sys-clk 2.0.0_rc4+ installed. Instead of RAM total usage it shows RAM load. | `true`, `false` | `true` |
 | `background_color` | Background color in RGBA4444 format | From `#0000` to `#FFFF` | `#1117` |
 | `cat_color` | Category text color (left side) in RGBA4444 format | From `#0000` to `#FFFF` | `#FFFF` |
@@ -85,3 +87,14 @@ Colors are provided in RGBA4444 format, which means that each character represen
 | `main_line_color` | Color of line representing FPS value on graph in RGBA4444 format | From `#0000` to `#FFFF` | `#FFFF` |
 | `rounded_line_color` | Color of line representing FPS value on graph if it's divisble by 10 in RGBA4444 format | From `#0000` to `#FFFF` | `#F0FF` |
 | `perfect_line_color` | Color of line representing FPS value on graph if it's divisble by 30 in RGBA4444 format | From `#0000` to `#FFFF` | `#0C0F` |
+
+> [game_resolutions]
+
+| Key | Explanation | Possible values | Default Value |
+|-----|-------------|-----------------|---------------|
+| `refresh_rate` | How often per second this mode should be refreshed. Higher value means higher CPU Core #3 usage, that's why it is recommended to stay at 1. | From `1` to `60` | `10` |
+| `layer_width_align` | On which side of the screen X axis you want this mode | `left`, `center`, `right` | `left` |
+| `layer_height_align` | On which side of the screen Y axis you want this mode | `top`, `center`, `bottom` | `top` |
+| `background_color` | Background color in RGBA4444 format | From `#0000` to `#FFFF` | `#1117` |
+| `cat_color` | Category text color (left side) in RGBA4444 format | From `#0000` to `#FFFF` | `#FFFF` |
+| `text_color` | Stats text color (right side) in RGBA4444 format | From `#0000` to `#FFFF` | `#FFFF` |

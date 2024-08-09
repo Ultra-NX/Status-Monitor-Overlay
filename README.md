@@ -4,7 +4,7 @@ Monitor Your hardware in real time!
 This is an overlay homebrew dedicated to Nintendo Switch.
 You need to have installed Tesla environment to use it.
 
-Tool contains six modes to choose, each one is explained [here](/docs/modes.md).<br>
+Tool contains five menus to choose, each one is explained [here](/docs/modes.md).<br>
 Overlay supports customizations through config file, more [here](/docs/config.md).
 
 If it's not working in dock, you need to first start Status Monitor, then put Nintendo Switch to dock.
@@ -21,7 +21,7 @@ If it's not working in dock, you need to first start Status Monitor, then put Ni
   - System Unsafe
 - SoC, PCB & Skin temperatures (Skin temperature not supported by FWs <5.0.0)
 - Fan Rotation Level
-- PFPS and FPS (they don't work for 32-bit games, shows only if [my fork of SaltyNX](https://github.com/masagrator/SaltyNX/releases) is installed)
+- PFPS, FPS, resolutions (they don't work for 32-bit games, shows only if [my fork of SaltyNX](https://github.com/masagrator/SaltyNX/releases) is installed)
 - Battery temperature, raw charge, age, average voltage, average current flow and average power flow
 - Charger type, max voltage, and max current
 - DSP usage (only for FW older than 17.0.0)
@@ -41,6 +41,7 @@ How to setup everything: [HERE](https://gist.github.com/masagrator/65fcbd5ad0924
 - Herbaciarz for providing screenshots from HDMI Grabber
 - KazushiMe for writing code to read registers from max17050 chip
 - CTCaer for Hekate from which I took max17050.h and calculation formulas for reading battery stats from max17050 chip
+- ChanseyIsTheBest for testing Game Resolutions menu
 
 # FAQ:
 Q: This homebrew has any impact on games?
