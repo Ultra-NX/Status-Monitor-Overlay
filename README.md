@@ -1,3 +1,23 @@
+
+# Ultra
+### Made based on the Meha fork, with current voltages displayed in Mini/Micro overlays
+- The maximum font size of micro-overlay text has been increased from 18 to 28
+
+- Added IP display in Other, Miscellaneous
+
+- Changed mini-overlay:
+Slightly edited the lines with voltages for better readability and added the percentage of battery charge
+
+- Added new micro-overlay modules such as:
+  - CPUB - Looks like the original Masagrator module, showing the load percentages of all CPU cores
+  - BRDM - Looks like the original Masagrator module, showing all temperatures, charge consumption and remaining runtime
+  - BRDB - Looks like the original Masagrator module, but removes the charging speed, runtime and adds the percentage of cooler speed.
+  - BATB - Unique Ultra module, shows charging percentage, discharge rate and remaining run time
+  - BATE - Same thing, but anchored to the right edge of the screen
+  - FPSE - FPS counter tied to the right edge of the screen
+
+### Module presets can be selected via [Ultra Tuner](https://github.com/Ultra-NX/Ultra-Tuner)
+
 # Status Monitor Overlay
 Monitor Your hardware in real time!
 
