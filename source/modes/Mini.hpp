@@ -286,7 +286,7 @@ public:
 				CPU_Hz / 1000000, (CPU_Hz / 100000) % 10);
 		}
 		if (settings.realVolts) {
-			snprintf(MINI_CPU_volt_c, sizeof(MINI_CPU_volt_c), "=%umV", realCPU_mV);
+			snprintf(MINI_CPU_volt_c, sizeof(MINI_CPU_volt_c), "[%umV]", realCPU_mV);
 		}
 
 		char MINI_GPU_Load_c[14];
@@ -304,7 +304,7 @@ public:
 				GPU_Hz / 1000000, (GPU_Hz / 100000) % 10);
 		}
 		if (settings.realVolts) {
-			snprintf(MINI_GPU_volt_c, sizeof(MINI_GPU_volt_c), "=%umV", realGPU_mV);
+			snprintf(MINI_GPU_volt_c, sizeof(MINI_GPU_volt_c), "[%umV]", realGPU_mV);
 		}
 		
 		///RAM
@@ -349,7 +349,7 @@ public:
 			}
 		}
 		if (settings.realVolts) {
-			snprintf(MINI_RAM_volt_c, sizeof(MINI_RAM_volt_c), "=%u/%umV", realRAM_mV/10000, realRAM_mV%10000);
+			snprintf(MINI_RAM_volt_c, sizeof(MINI_RAM_volt_c), "[%u/%umV]", realRAM_mV/10000, realRAM_mV%10000);
 		}
 		
 		///Thermal
@@ -369,7 +369,7 @@ public:
 		char MINI_SOC_volt_c[10] = "";
 		snprintf(Rotation_SpeedLevel_c, sizeof Rotation_SpeedLevel_c, "%2.1f%%", Rotation_SpeedLevel_f * 100);
 		if (settings.realVolts) {
-			snprintf(MINI_SOC_volt_c, sizeof(MINI_SOC_volt_c), "=%umV", realSOC_mV);
+			snprintf(MINI_SOC_volt_c, sizeof(MINI_SOC_volt_c), "[%umV]", realSOC_mV);
 		}
 
 		if (GameRunning && renderCalls_shared && resolutionShow) {
