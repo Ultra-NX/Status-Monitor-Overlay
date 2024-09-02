@@ -996,14 +996,14 @@ struct ResolutionSettings {
 };
 
 void GetConfigSettings(MiniSettings* settings) {
-	settings -> realFrequencies = false;
+	settings -> realFrequencies = true;
 	settings -> realVolts = true;
 	settings -> handheldFontSize = 15;
 	settings -> dockedFontSize = 15;
 	convertStrToRGBA4444("#1117", &(settings -> backgroundColor));
-	convertStrToRGBA4444("#FFFF", &(settings -> catColor));
+	convertStrToRGBA4444("#CDEF", &(settings -> catColor));
 	convertStrToRGBA4444("#FFFF", &(settings -> textColor));
-	settings -> show = "CPU+GPU+RAM+TEMP+DRAW+FAN+FPS+RES";
+	settings -> show = "CPU+GPU+RAM+TEMP+FAN+DRAW+RES+FPS";
 	settings -> showRAMLoad = true;
 	settings -> refreshRate = 1;
 	settings -> setPos = 0;
@@ -1119,15 +1119,15 @@ void GetConfigSettings(MiniSettings* settings) {
 }
 
 void GetConfigSettings(MicroSettings* settings) {
-	settings -> realFrequencies = false;
-	settings -> realVolts = false; 
-	settings -> handheldFontSize = 18;
-	settings -> dockedFontSize = 18;
-	settings -> alignTo = 1;
-	convertStrToRGBA4444("#1117", &(settings -> backgroundColor));
-	convertStrToRGBA4444("#FCCF", &(settings -> catColor));
+	settings -> realFrequencies = true;
+	settings -> realVolts = true; 
+	settings -> handheldFontSize = 15;
+	settings -> dockedFontSize = 15;
+	settings -> alignTo = 0;
+	convertStrToRGBA4444("#1113", &(settings -> backgroundColor));
+	convertStrToRGBA4444("#BDFF", &(settings -> catColor));
 	convertStrToRGBA4444("#FFFF", &(settings -> textColor));
-	settings -> show = "FPS+CPU+GPU+RAM+BRD+FAN+BAT";
+	settings -> show = "CPUB+GPU+RAM+BRDB+FPSE";
 	settings -> showRAMLoad = true;
 	settings -> setPosBottom = false;
 	settings -> refreshRate = 1;
@@ -1240,10 +1240,10 @@ void GetConfigSettings(MicroSettings* settings) {
 }
 
 void GetConfigSettings(FpsCounterSettings* settings) {
-	settings -> handheldFontSize = 40;
-	settings -> dockedFontSize = 40;
+	settings -> handheldFontSize = 28;
+	settings -> dockedFontSize = 28;
 	convertStrToRGBA4444("#1117", &(settings -> backgroundColor));
-	convertStrToRGBA4444("#FFFF", &(settings -> textColor));
+	convertStrToRGBA4444("#0F0F", &(settings -> textColor));
 	settings -> setPos = 0;
 	settings -> refreshRate = 31;
 

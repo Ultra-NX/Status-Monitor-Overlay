@@ -1,5 +1,5 @@
 [status-monitor]
-ultra=true
+ultra=Normal+
 battery_avg_iir_filter=false
 battery_time_left_refreshrate=60
 
@@ -9,8 +9,6 @@ layer_width_align=left
 show_real_freqs=true
 show_deltas=true
 show_target_freqs=true
-show_fps=true
-show_res=true
 
 [mini]
 refresh_rate=1
@@ -20,7 +18,7 @@ handheld_font_size=15
 docked_font_size=15
 real_freqs=true
 real_volts=true
-show=CPU+GPU+RAM+TEMP+FAN+DRAW+FPS+RES
+show=CPU+GPU+RAM+TEMP+FAN+DRAW+RES+FPS
 replace_MB_with_RAM_load=true
 background_color=#1117
 cat_color=#CDEF
@@ -35,6 +33,7 @@ text_align=left
 real_freqs=true
 real_volts=true
 show=CPUB+GPU+RAM+BRDB+FPSE
+;all modules: (CPU CPUB) GPU RAM (BRD BRDM BRDB) FAN PWR (BAT BATE) (FPS FPSE)
 replace_GB_with_RAM_load=true
 background_color=#1113
 cat_color=#BDFF
