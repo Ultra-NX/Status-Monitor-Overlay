@@ -367,7 +367,7 @@ public:
 				skin_temperaturemiliC / 1000, (skin_temperaturemiliC / 100) % 10);
 		}
 		char MINI_SOC_volt_c[10] = "";
-		snprintf(Rotation_SpeedLevel_c, sizeof Rotation_SpeedLevel_c, "%2.1f%%", Rotation_SpeedLevel_f * 100);
+		snprintf(Rotation_SpeedLevel_c, sizeof Rotation_SpeedLevel_c, "%2.1f%%", Rotation_Duty);
 		if (settings.realVolts) {
 			snprintf(MINI_SOC_volt_c, sizeof(MINI_SOC_volt_c), "[%umV]", realSOC_mV);
 		}
