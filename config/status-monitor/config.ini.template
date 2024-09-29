@@ -1,5 +1,5 @@
 [status-monitor]
-ultra=Normal+
+ultra=Ultra+
 battery_avg_iir_filter=false
 battery_time_left_refreshrate=60
 
@@ -27,13 +27,13 @@ text_color=#FFFF
 [micro]
 refresh_rate=1
 layer_height_align=top
-handheld_font_size=15
-docked_font_size=15
+handheld_font_size=12
+docked_font_size=12
 text_align=left
 real_freqs=true
 real_volts=true
 show_full_cpu=true
-show=CPU+GPU+RAM+BRDB+FPSE
+show=CPU+GPU+RAM+BRDB+FPS+BATE
 ;all modules: CPU GPU RAM (SOC BRD BRDB) FAN (PWR BAT BATB BATE) (FPS FPSE)
 replace_GB_with_RAM_load=true
 background_color=#1113
