@@ -6,6 +6,12 @@ private:
 	FpsGraphSettings settings;
 	ApmPerformanceMode performanceMode = ApmPerformanceMode_Invalid;
 	bool isDocked = false;
+	uint64_t systemtickfrequency_impl = systemtickfrequency;
+	uint32_t cnt = 0;
+	char CPU_Load_c[12] = "";
+	char GPU_Load_c[12] = "";
+	char RAM_Load_c[12] = "";
+	char TEMP_c[32] = "";
 public:
 	bool isStarted = false;
     com_FPSGraph() { 
@@ -37,7 +43,10 @@ public:
 		tsl::hlp::requestForeground(false);
 		FullMode = false;
 		TeslaFPS = settings.refreshRate;
+		systemtickfrequency_impl /= settings.refreshRate;
 		deactivateOriginalFooter = true;
+		mutexInit(&mutex_Misc);
+		StartInfoThread();
 	}
 
 	~com_FPSGraph() {
@@ -48,6 +57,7 @@ public:
 		tsl::hlp::requestForeground(true);
 		alphabackground = 0xD;
 		deactivateOriginalFooter = false;
+		EndInfoThread();
 	}
 
 	struct stats {
@@ -166,6 +176,17 @@ public:
 				last_element--;
 			}
 
+			if (settings.showInfo) {
+				s16 info_x = base_x+rectangle_width+rectangle_x + 6;
+				s16 info_y = base_y + 3;
+				renderer->drawRect(info_x, 0, rectangle_width /2 - 4, rectangle_height + 12, a(settings.backgroundColor));
+				renderer->drawString("CPU\nGPU\nRAM\nSOC\nPCB\nSKN", false, info_x, info_y+11, 11, renderer->a(settings.borderColor));
+
+				renderer->drawString(CPU_Load_c, false, info_x + 40, info_y+11, 11, renderer->a(settings.minFPSTextColor));
+				renderer->drawString(GPU_Load_c, false, info_x + 40, info_y+22, 11, renderer->a(settings.minFPSTextColor));
+				renderer->drawString(RAM_Load_c, false, info_x + 40, info_y+33, 11, renderer->a(settings.minFPSTextColor));
+				renderer->drawString(TEMP_c, false, info_x + 40, info_y+44, 11, renderer->a(settings.minFPSTextColor));
+			}
 		});
 
 		rootFrame->setContent(Status);
@@ -174,6 +195,10 @@ public:
 	}
 
 	virtual void update() override {
+		cnt++;
+		if (cnt >= TeslaFPS)
+			cnt = 0;
+
 		///FPS
 		static float FPSavg_old = 0;
 		stats temp = {0, false};
@@ -196,7 +221,8 @@ public:
 			}			
 		}
 		if (FPSavg_old == FPSavg)
-			return;
+			//return;
+			goto read_value;
 		FPSavg_old = FPSavg;
 		snprintf(FPSavg_c, sizeof FPSavg_c, "%2.1f",  FPSavg);
 		if (FPSavg < 254) {
@@ -230,7 +256,44 @@ public:
 				isStarted = false;
 			}
 		}
+
+		read_value:
+
+		if (cnt)
+			return;
+
+		mutexLock(&mutex_Misc);
+		if (hosversionAtLeast(10,0,0)) {
+			snprintf(TEMP_c, sizeof TEMP_c, 
+				"%2.1f\u00B0C\n%2.1f\u00B0C\n%2d.%d\u00B0C", 
+				SOC_temperatureF, PCB_temperatureF, skin_temperaturemiliC / 1000, (skin_temperaturemiliC / 100) % 10);
+		}
+		else {
+			snprintf(TEMP_c, sizeof TEMP_c, 
+				"%2d.%d\u00B0C\n%2d.%d\u00B0C\n%2d.%d\u00B0C", 
+				SOC_temperatureC / 1000, (SOC_temperatureC / 100) % 10, 
+				PCB_temperatureC / 1000, (PCB_temperatureC % 100) % 10,
+				skin_temperaturemiliC / 1000, (skin_temperaturemiliC / 100) % 10);
+		}
+
+		if (idletick0 > systemtickfrequency_impl) idletick0 = systemtickfrequency_impl;
+		if (idletick1 > systemtickfrequency_impl) idletick1 = systemtickfrequency_impl;
+		if (idletick2 > systemtickfrequency_impl) idletick2 = systemtickfrequency_impl;
+		if (idletick3 > systemtickfrequency_impl) idletick3 = systemtickfrequency_impl;
+		double cpu_usage0 = (1.d - ((double)idletick0 / systemtickfrequency_impl)) * 100;
+		double cpu_usage1 = (1.d - ((double)idletick1 / systemtickfrequency_impl)) * 100;
+		double cpu_usage2 = (1.d - ((double)idletick2 / systemtickfrequency_impl)) * 100;
+		double cpu_usage3 = (1.d - ((double)idletick3 / systemtickfrequency_impl)) * 100;
+		double cpu_usageM = 0;
+		if (cpu_usage0 > cpu_usageM)	cpu_usageM = cpu_usage0;
+		if (cpu_usage1 > cpu_usageM)	cpu_usageM = cpu_usage1;
+		if (cpu_usage2 > cpu_usageM)	cpu_usageM = cpu_usage2;
+		if (cpu_usage3 > cpu_usageM)	cpu_usageM = cpu_usage3;
+		snprintf(CPU_Load_c, sizeof CPU_Load_c, "%.1f%%", cpu_usageM);
+		snprintf(GPU_Load_c, sizeof GPU_Load_c, "%d.%d%%", GPU_Load_u / 10, GPU_Load_u % 10);
+		snprintf(RAM_Load_c, sizeof RAM_Load_c, "%hu.%hhu%%", ramLoad[SysClkRamLoad_All] / 10, ramLoad[SysClkRamLoad_All] % 10);
 		
+		mutexUnlock(&mutex_Misc);
 	}
 	virtual bool handleInput(uint64_t keysDown, uint64_t keysHeld, touchPosition touchInput, JoystickPosition leftJoyStick, JoystickPosition rightJoyStick) override {
 		if (isKeyComboPressed(keysHeld, keysDown, mappedButtons)) {

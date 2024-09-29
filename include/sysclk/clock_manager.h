@@ -26,6 +26,7 @@ typedef struct
     uint32_t ramLoad[SysClkRamLoad_EnumMax];
     uint32_t realVolts[4];
     uint32_t perfConfId;
+    uint32_t reserved[8];
 } SysClkContext;
 
 #ifdef __cplusplus

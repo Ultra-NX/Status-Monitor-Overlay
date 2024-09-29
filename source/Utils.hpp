@@ -164,12 +164,21 @@ resolutionCalls* viewportCalls_shared = 0;
 uint32_t realCPU_Hz = 0;
 uint32_t realGPU_Hz = 0;
 uint32_t realRAM_Hz = 0;
+uint32_t ramLoad[SysClkRamLoad_EnumMax];
 uint32_t realCPU_mV = 0;
 uint32_t realGPU_mV = 0;
 uint32_t realRAM_mV = 0;
 uint32_t realSOC_mV = 0;
-uint32_t ramLoad[SysClkRamLoad_EnumMax];
 uint8_t refreshRate = 0;
+
+//Tweaks to nvInitialize so it will take less RAM
+#define NVDRV_TMEM_SIZE (8 * 0x1000)
+char nvdrv_tmem_data[NVDRV_TMEM_SIZE] alignas(0x1000);
+
+Result __nx_nv_create_tmem(TransferMemory *t, u32 *out_size, Permission perm) {
+    *out_size = NVDRV_TMEM_SIZE;
+    return tmemCreateFromMemory(t, nvdrv_tmem_data, NVDRV_TMEM_SIZE, perm);
+}
 
 int compare (const void* elem1, const void* elem2) {
 	if ((((resolutionCalls*)(elem1)) -> calls) > (((resolutionCalls*)(elem2)) -> calls)) return -1;
@@ -432,12 +441,12 @@ void Misc(void*) {
 				realCPU_Hz = sysclkCTX.realFreqs[SysClkModule_CPU];
 				realGPU_Hz = sysclkCTX.realFreqs[SysClkModule_GPU];
 				realRAM_Hz = sysclkCTX.realFreqs[SysClkModule_MEM];
+				ramLoad[SysClkRamLoad_All] = sysclkCTX.ramLoad[SysClkRamLoad_All];
+				ramLoad[SysClkRamLoad_Cpu] = sysclkCTX.ramLoad[SysClkRamLoad_Cpu];
 				realCPU_mV = sysclkCTX.realVolts[0];
 				realGPU_mV = sysclkCTX.realVolts[1];
 				realRAM_mV = sysclkCTX.realVolts[2];
 				realSOC_mV = sysclkCTX.realVolts[3];
-				ramLoad[SysClkRamLoad_All] = sysclkCTX.ramLoad[SysClkRamLoad_All];
-				ramLoad[SysClkRamLoad_Cpu] = sysclkCTX.ramLoad[SysClkRamLoad_Cpu];
 			}
 		}
 		
@@ -503,6 +512,7 @@ void Misc(void*) {
 			FPSmin = 254;
 			FPSmax = 0;
 		}
+
 		// Interval
 		mutexUnlock(&mutex_Misc);
 		svcSleepThread(TeslaFPS < 10 ? (1'000'000'000 / TeslaFPS) : 100'000'000);
@@ -527,6 +537,60 @@ void Misc2(void*) {
 		}
 		// Interval
 		svcSleepThread(100'000'000);
+	}
+}
+
+void Misc3(void*) {
+	while (!threadexit) {
+		mutexLock(&mutex_Misc);
+
+		if (R_SUCCEEDED(sysclkCheck)) {
+			SysClkContext sysclkCTX;
+			if (R_SUCCEEDED(sysclkIpcGetCurrentContext(&sysclkCTX))) {
+				ramLoad[SysClkRamLoad_All] = sysclkCTX.ramLoad[SysClkRamLoad_All];
+				ramLoad[SysClkRamLoad_Cpu] = sysclkCTX.ramLoad[SysClkRamLoad_Cpu];
+			}
+		}
+		
+		//Temperatures
+		if (R_SUCCEEDED(tsCheck)) {
+			if (hosversionAtLeast(10,0,0)) {
+				TsSession ts_session;
+				Result rc = tsOpenSession(&ts_session, TsDeviceCode_LocationExternal);
+				if (R_SUCCEEDED(rc)) {
+					tsSessionGetTemperature(&ts_session, &SOC_temperatureF);
+					tsSessionClose(&ts_session);
+				}
+				rc = tsOpenSession(&ts_session, TsDeviceCode_LocationInternal);
+				if (R_SUCCEEDED(rc)) {
+					tsSessionGetTemperature(&ts_session, &PCB_temperatureF);
+					tsSessionClose(&ts_session);
+				}
+			}
+			else {
+				tsGetTemperatureMilliC(TsLocation_External, &SOC_temperatureC);
+				tsGetTemperatureMilliC(TsLocation_Internal, &PCB_temperatureC);
+			}
+		}
+		if (R_SUCCEEDED(tcCheck)) tcGetSkinTemperatureMilliC(&skin_temperaturemiliC);
+		
+		//Fan
+		if (R_SUCCEEDED(pwmCheck)) {
+			double temp = 0;
+			if (R_SUCCEEDED(pwmChannelSessionGetDutyCycle(&g_ICon, &temp))) {
+				temp *= 10;
+				temp = trunc(temp);
+				temp /= 10;
+				Rotation_Duty = 100.0 - temp;
+			}
+		}
+		
+		//GPU Load
+		if (R_SUCCEEDED(nvCheck)) nvIoctl(fd, NVGPU_GPU_IOCTL_PMU_GET_GPU_LOAD, &GPU_Load_u);
+		
+		// Interval
+		mutexUnlock(&mutex_Misc);
+		svcSleepThread(1'000'000'000);
 	}
 }
 
@@ -652,6 +716,36 @@ void EndFPSCounterThread() {
 	threadClose(&t0);
 	threadWaitForExit(&t6);
 	threadClose(&t6);
+	threadexit = false;
+	threadexit2 = false;
+}
+
+void StartInfoThread() {
+	threadCreate(&t1, CheckCore0, NULL, NULL, 0x1000, 0x10, 0);
+	threadCreate(&t2, CheckCore1, NULL, NULL, 0x1000, 0x10, 1);
+	threadCreate(&t3, CheckCore2, NULL, NULL, 0x1000, 0x10, 2);
+	threadCreate(&t4, CheckCore3, NULL, NULL, 0x1000, 0x10, 3);
+	threadCreate(&t7, Misc3, NULL, NULL, 0x1000, 0x3F, -2);
+	threadStart(&t1);
+	threadStart(&t2);
+	threadStart(&t3);
+	threadStart(&t4);
+	threadStart(&t7);
+}
+
+void EndInfoThread() {
+	threadexit = true;
+	threadexit2 = true;
+	threadWaitForExit(&t1);
+	threadWaitForExit(&t2);
+	threadWaitForExit(&t3);
+	threadWaitForExit(&t4);
+	threadWaitForExit(&t7);
+	threadClose(&t1);
+	threadClose(&t2);
+	threadClose(&t3);
+	threadClose(&t4);
+	threadClose(&t7);
 	threadexit = false;
 	threadexit2 = false;
 }
@@ -953,6 +1047,7 @@ struct MicroSettings {
 	uint8_t refreshRate;
 	bool realFrequencies;
 	bool realVolts;
+	bool showFullCPU;
 	size_t handheldFontSize;
 	size_t dockedFontSize;
 	uint8_t alignTo;
@@ -974,6 +1069,7 @@ struct FpsCounterSettings {
 };
 
 struct FpsGraphSettings {
+	bool showInfo;
 	uint8_t refreshRate;
 	uint16_t backgroundColor;
 	uint16_t fpsColor;
@@ -1048,7 +1144,7 @@ void GetConfigSettings(MiniSettings* settings) {
 		settings -> realVolts = !(key.compare("TRUE")); 
 	}
 
-	long maxFontSize = 22;
+	long maxFontSize = 32;
 	long minFontSize = 8;
 	if (parsedData["mini"].find("handheld_font_size") != parsedData["mini"].end()) {
 		key = parsedData["mini"]["handheld_font_size"];
@@ -1120,14 +1216,15 @@ void GetConfigSettings(MiniSettings* settings) {
 
 void GetConfigSettings(MicroSettings* settings) {
 	settings -> realFrequencies = true;
-	settings -> realVolts = true; 
-	settings -> handheldFontSize = 15;
-	settings -> dockedFontSize = 15;
+	settings -> realVolts = true;
+	settings -> showFullCPU = true;
+	settings -> handheldFontSize = 12;
+	settings -> dockedFontSize = 12;
 	settings -> alignTo = 0;
 	convertStrToRGBA4444("#1113", &(settings -> backgroundColor));
 	convertStrToRGBA4444("#BDFF", &(settings -> catColor));
 	convertStrToRGBA4444("#FFFF", &(settings -> textColor));
-	settings -> show = "CPUB+GPU+RAM+BRDB+FPSE";
+	settings -> show = "CPU+GPU+RAM+BRDB+FPS+BATE";
 	settings -> showRAMLoad = true;
 	settings -> setPosBottom = false;
 	settings -> refreshRate = 1;
@@ -1170,6 +1267,11 @@ void GetConfigSettings(MicroSettings* settings) {
 		key = parsedData["micro"]["real_volts"]; 
 		convertToUpper(key); 
 		settings -> realVolts = !(key.compare("TRUE")); 
+	}  
+	if (parsedData["micro"].find("show_full_cpu") != parsedData["micro"].end()) { 
+		key = parsedData["micro"]["show_full_cpu"]; 
+		convertToUpper(key); 
+		settings -> showFullCPU = key.compare("FALSE"); 
 	} 
 	if (parsedData["micro"].find("text_align") != parsedData["micro"].end()) {
 		key = parsedData["micro"]["text_align"];
@@ -1184,7 +1286,7 @@ void GetConfigSettings(MicroSettings* settings) {
 			settings -> alignTo = 2;
 		}
 	}
-	long maxFontSize = 18;
+	long maxFontSize = 32;
 	long minFontSize = 8;
 	if (parsedData["micro"].find("handheld_font_size") != parsedData["micro"].end()) {
 		key = parsedData["micro"]["handheld_font_size"];
@@ -1318,6 +1420,7 @@ void GetConfigSettings(FpsCounterSettings* settings) {
 }
 
 void GetConfigSettings(FpsGraphSettings* settings) {
+	settings -> showInfo = false;
 	settings -> setPos = 0;
 	convertStrToRGBA4444("#1117", &(settings -> backgroundColor));
 	convertStrToRGBA4444("#4444", &(settings -> fpsColor));
@@ -1419,6 +1522,11 @@ void GetConfigSettings(FpsGraphSettings* settings) {
 		uint16_t temp = 0;
 		if (convertStrToRGBA4444(key, &temp))
 			settings -> perfectLineColor = temp;
+	}
+	if (parsedData["fps-graph"].find("show_info") != parsedData["fps-graph"].end()) {
+		key = parsedData["fps-graph"]["show_info"];
+		convertToUpper(key);
+		settings -> showInfo = !(key.compare("TRUE"));
 	}
 }
 

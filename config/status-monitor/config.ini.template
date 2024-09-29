@@ -32,8 +32,9 @@ docked_font_size=15
 text_align=left
 real_freqs=true
 real_volts=true
-show=CPUB+GPU+RAM+BRDB+FPSE
-;all modules: (CPU CPUB) GPU RAM (BRD BRDM BRDB) FAN PWR (BAT BATE) (FPS FPSE)
+show_full_cpu=true
+show=CPU+GPU+RAM+BRDB+FPSE
+;all modules: CPU GPU RAM (SOC BRD BRDB) FAN (PWR BAT BATB BATE) (FPS FPSE)
 replace_GB_with_RAM_load=true
 background_color=#1113
 cat_color=#BDFF

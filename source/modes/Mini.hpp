@@ -179,7 +179,6 @@ public:
 						strcat(print_text, "\n");
 					strcat(print_text, "FPS");
 					entry_count++;
-					entry_count++;
 					flags |= (1 << 6);
 				}
 				else if (!key.compare("RES") && !(flags & 1 << 7) && GameRunning) {
@@ -309,7 +308,7 @@ public:
 		
 		///RAM
 		char MINI_RAM_var_compressed_c[19] = "";
-		char MINI_RAM_volt_c[15] = "";
+		char MINI_RAM_volt_c[16] = "";
 		if (R_FAILED(sysclkCheck) || !settings.showRAMLoad) {
 			float RAM_Total_application_f = (float)RAM_Total_application_u / 1024 / 1024;
 			float RAM_Total_applet_f = (float)RAM_Total_applet_u / 1024 / 1024;
@@ -349,7 +348,7 @@ public:
 			}
 		}
 		if (settings.realVolts) {
-			snprintf(MINI_RAM_volt_c, sizeof(MINI_RAM_volt_c), "[%u/%umV]", realRAM_mV/10000, realRAM_mV%10000);
+			snprintf(MINI_RAM_volt_c, sizeof(MINI_RAM_volt_c), "[%u/%umV]", realRAM_mV >> 16, realRAM_mV & 0xFFFF);
 		}
 		
 		///Thermal
@@ -366,8 +365,9 @@ public:
 				PCB_temperatureC / 1000, (PCB_temperatureC / 100) % 10, 
 				skin_temperaturemiliC / 1000, (skin_temperaturemiliC / 100) % 10);
 		}
-		char MINI_SOC_volt_c[10] = "";
 		snprintf(Rotation_SpeedLevel_c, sizeof Rotation_SpeedLevel_c, "%2.1f%%", Rotation_Duty);
+
+		char MINI_SOC_volt_c[10] = "";
 		if (settings.realVolts) {
 			snprintf(MINI_SOC_volt_c, sizeof(MINI_SOC_volt_c), "[%umV]", realSOC_mV);
 		}
@@ -508,10 +508,7 @@ public:
 					strcat(Temp, "\n");
 				}
 				char Temp_s[24] = "";
-				snprintf(Temp_s, sizeof(Temp_s), "%2.1f", FPSavg);
-				strcat(Temp, Temp_s);
-				strcat(Temp, "\n");
-				snprintf(Temp_s, sizeof(Temp_s), "Min:%2.1f - Max:%2.1f", FPSmin, FPSmax);
+				snprintf(Temp_s, sizeof(Temp_s), "%2.1f [%2.1f - %2.1f]", FPSavg, FPSmin, FPSmax);
 				strcat(Temp, Temp_s);
 				flags |= 1 << 6;			
 			}

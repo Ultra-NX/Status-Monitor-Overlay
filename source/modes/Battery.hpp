@@ -54,6 +54,10 @@ public:
 				"Battery Current Flow (%ss AVG): %+.0f mA\n"
 				"Battery Power Flow%s: %+.3f W\n"
 				"Battery Remaining Time: %s\n"
+				"Input Current Limt: %d mA\n"
+				"VBUS Current Limit: %d mA\n" 
+				"Charge Voltage Limit: %d mV\n"
+				"Charge Current Limit: %d mA\n"
 				"Charger Type: %u\n"
 				"Charger Max Voltage: %u mV\n"
 				"Charger Max Current: %u mA",
@@ -66,6 +70,10 @@ public:
 				batteryFiltered ? "11.25" : "5", batCurrentAvg,
 				batteryFiltered ? "" : " (5s AVG)", PowerConsumption, 
 				tempBatTimeEstimate,
+				_batteryChargeInfoFields.InputCurrentLimit,
+				_batteryChargeInfoFields.VBUSCurrentLimit,
+				_batteryChargeInfoFields.ChargeVoltageLimit,
+				_batteryChargeInfoFields.ChargeCurrentLimit,
 				ChargerConnected,
 				ChargerVoltageLimit,
 				ChargerCurrentLimit
