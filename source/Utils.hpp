@@ -4,8 +4,8 @@
 #include "Battery.hpp"
 #include "audsnoop.h"
 #include "Misc.hpp"
-#include "i2c.h"
 #include "max17050.h"
+#include "tmp451.h"
 #include "pwm.h"
 #include <numeric>
 #include <tesla.hpp>
@@ -52,7 +52,7 @@ MmuRequest nvjpgRequest;
 Result clkrstCheck = 1;
 Result nvCheck = 1;
 Result pcvCheck = 1;
-Result tsCheck = 1;
+Result i2cCheck = 1;
 Result pwmCheck = 1;
 Result tcCheck = 1;
 Result Hinted = 1;
@@ -97,8 +97,6 @@ uint8_t batteryTimeLeftRefreshRate = 60;
 //Temperatures
 float SOC_temperatureF = 0;
 float PCB_temperatureF = 0;
-int32_t SOC_temperatureC = 0;
-int32_t PCB_temperatureC = 0;
 int32_t skin_temperaturemiliC = 0;
 
 //CPU Usage
@@ -140,8 +138,8 @@ uintptr_t FPSavgaddress = 0;
 uint64_t PID = 0;
 uint32_t FPS = 0xFE;
 float FPSavg = 254;
-float FPSmin = 254;
-float FPSmax = 0;
+float FPSmin = 254; 
+float FPSmax = 0; 
 SharedMemory _sharedmemory = {};
 bool SharedMemoryUsed = false;
 uint32_t* MAGIC_shared = 0;
@@ -165,10 +163,10 @@ uint32_t realCPU_Hz = 0;
 uint32_t realGPU_Hz = 0;
 uint32_t realRAM_Hz = 0;
 uint32_t ramLoad[SysClkRamLoad_EnumMax];
-uint32_t realCPU_mV = 0;
-uint32_t realGPU_mV = 0;
-uint32_t realRAM_mV = 0;
-uint32_t realSOC_mV = 0;
+uint32_t realCPU_mV = 0; 
+uint32_t realGPU_mV = 0; 
+uint32_t realRAM_mV = 0; 
+uint32_t realSOC_mV = 0; 
 uint8_t refreshRate = 0;
 
 //Tweaks to nvInitialize so it will take less RAM
@@ -286,7 +284,7 @@ void CheckIfGameRunning(void*) {
 
 Mutex mutex_BatteryChecker = {0};
 void BatteryChecker(void*) {
-	if (R_FAILED(psmCheck)){
+	if (R_FAILED(psmCheck) || R_FAILED(i2cCheck)){
 		return;
 	}
 	uint16_t data = 0;
@@ -443,32 +441,17 @@ void Misc(void*) {
 				realRAM_Hz = sysclkCTX.realFreqs[SysClkModule_MEM];
 				ramLoad[SysClkRamLoad_All] = sysclkCTX.ramLoad[SysClkRamLoad_All];
 				ramLoad[SysClkRamLoad_Cpu] = sysclkCTX.ramLoad[SysClkRamLoad_Cpu];
-				realCPU_mV = sysclkCTX.realVolts[0];
-				realGPU_mV = sysclkCTX.realVolts[1];
-				realRAM_mV = sysclkCTX.realVolts[2];
-				realSOC_mV = sysclkCTX.realVolts[3];
+				realCPU_mV = sysclkCTX.realVolts[0]; 
+				realGPU_mV = sysclkCTX.realVolts[1]; 
+				realRAM_mV = sysclkCTX.realVolts[2]; 
+				realSOC_mV = sysclkCTX.realVolts[3]; 
 			}
 		}
 		
 		//Temperatures
-		if (R_SUCCEEDED(tsCheck)) {
-			if (hosversionAtLeast(10,0,0)) {
-				TsSession ts_session;
-				Result rc = tsOpenSession(&ts_session, TsDeviceCode_LocationExternal);
-				if (R_SUCCEEDED(rc)) {
-					tsSessionGetTemperature(&ts_session, &SOC_temperatureF);
-					tsSessionClose(&ts_session);
-				}
-				rc = tsOpenSession(&ts_session, TsDeviceCode_LocationInternal);
-				if (R_SUCCEEDED(rc)) {
-					tsSessionGetTemperature(&ts_session, &PCB_temperatureF);
-					tsSessionClose(&ts_session);
-				}
-			}
-			else {
-				tsGetTemperatureMilliC(TsLocation_External, &SOC_temperatureC);
-				tsGetTemperatureMilliC(TsLocation_Internal, &PCB_temperatureC);
-			}
+		if (R_SUCCEEDED(i2cCheck)) {
+			Tmp451GetSocTemp(&SOC_temperatureF);
+			Tmp451GetPcbTemp(&PCB_temperatureF);
 		}
 		if (R_SUCCEEDED(tcCheck)) tcGetSkinTemperatureMilliC(&skin_temperaturemiliC);
 		
@@ -503,16 +486,16 @@ void Misc(void*) {
 			if (SharedMemoryUsed) {
 				FPS = *FPS_shared;
 				FPSavg = 19'200'000.f / (std::accumulate<uint32_t*, float>(FPSticks_shared, FPSticks_shared+10, 0) / 10);
-				if (FPSavg > FPSmax)	FPSmax = FPSavg;
-				if (FPSavg < FPSmin)	FPSmin = FPSavg;
+				if (FPSavg > FPSmax)	FPSmax = FPSavg; 
+				if (FPSavg < FPSmin)	FPSmin = FPSavg; 
 			}
 		}
 		else {
 			FPSavg = 254;
-			FPSmin = 254;
-			FPSmax = 0;
+			FPSmin = 254; 
+			FPSmax = 0; 
 		}
-
+		
 		// Interval
 		mutexUnlock(&mutex_Misc);
 		svcSleepThread(TeslaFPS < 10 ? (1'000'000'000 / TeslaFPS) : 100'000'000);
@@ -553,24 +536,9 @@ void Misc3(void*) {
 		}
 		
 		//Temperatures
-		if (R_SUCCEEDED(tsCheck)) {
-			if (hosversionAtLeast(10,0,0)) {
-				TsSession ts_session;
-				Result rc = tsOpenSession(&ts_session, TsDeviceCode_LocationExternal);
-				if (R_SUCCEEDED(rc)) {
-					tsSessionGetTemperature(&ts_session, &SOC_temperatureF);
-					tsSessionClose(&ts_session);
-				}
-				rc = tsOpenSession(&ts_session, TsDeviceCode_LocationInternal);
-				if (R_SUCCEEDED(rc)) {
-					tsSessionGetTemperature(&ts_session, &PCB_temperatureF);
-					tsSessionClose(&ts_session);
-				}
-			}
-			else {
-				tsGetTemperatureMilliC(TsLocation_External, &SOC_temperatureC);
-				tsGetTemperatureMilliC(TsLocation_Internal, &PCB_temperatureC);
-			}
+		if (R_SUCCEEDED(i2cCheck)) {
+			Tmp451GetSocTemp(&SOC_temperatureF);
+			Tmp451GetPcbTemp(&PCB_temperatureF);
 		}
 		if (R_SUCCEEDED(tcCheck)) tcGetSkinTemperatureMilliC(&skin_temperaturemiliC);
 		
@@ -1032,7 +1000,7 @@ struct FullSettings {
 struct MiniSettings {
 	uint8_t refreshRate;
 	bool realFrequencies;
-	bool realVolts;
+	bool realVolts; 
 	size_t handheldFontSize;
 	size_t dockedFontSize;
 	uint16_t backgroundColor;
@@ -1046,8 +1014,8 @@ struct MiniSettings {
 struct MicroSettings {
 	uint8_t refreshRate;
 	bool realFrequencies;
-	bool realVolts;
-	bool showFullCPU;
+	bool realVolts; 
+	bool showFullCPU; 
 	size_t handheldFontSize;
 	size_t dockedFontSize;
 	uint8_t alignTo;
@@ -1138,11 +1106,11 @@ void GetConfigSettings(MiniSettings* settings) {
 		convertToUpper(key);
 		settings -> realFrequencies = !(key.compare("TRUE"));
 	}
-	if (parsedData["mini"].find("real_volts") != parsedData["mini"].end()) { 
-		key = parsedData["mini"]["real_volts"]; 
-		convertToUpper(key); 
-		settings -> realVolts = !(key.compare("TRUE")); 
-	}
+	if (parsedData["mini"].find("real_volts") != parsedData["mini"].end()) {  
+		key = parsedData["mini"]["real_volts"];  
+		convertToUpper(key);  
+		settings -> realVolts = !(key.compare("TRUE"));  
+	} 
 
 	long maxFontSize = 32;
 	long minFontSize = 8;
@@ -1263,10 +1231,10 @@ void GetConfigSettings(MicroSettings* settings) {
 		convertToUpper(key);
 		settings -> realFrequencies = !(key.compare("TRUE"));
 	}
-	if (parsedData["micro"].find("real_volts") != parsedData["micro"].end()) { 
-		key = parsedData["micro"]["real_volts"]; 
-		convertToUpper(key); 
-		settings -> realVolts = !(key.compare("TRUE")); 
+	if (parsedData["micro"].find("real_volts") != parsedData["micro"].end()) {  
+		key = parsedData["micro"]["real_volts"];  
+		convertToUpper(key);  
+		settings -> realVolts = !(key.compare("TRUE"));  
 	}  
 	if (parsedData["micro"].find("show_full_cpu") != parsedData["micro"].end()) { 
 		key = parsedData["micro"]["show_full_cpu"]; 

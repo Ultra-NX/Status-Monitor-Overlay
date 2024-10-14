@@ -263,18 +263,9 @@ public:
 			return;
 
 		mutexLock(&mutex_Misc);
-		if (hosversionAtLeast(10,0,0)) {
-			snprintf(TEMP_c, sizeof TEMP_c, 
-				"%2.1f\u00B0C\n%2.1f\u00B0C\n%2d.%d\u00B0C", 
-				SOC_temperatureF, PCB_temperatureF, skin_temperaturemiliC / 1000, (skin_temperaturemiliC / 100) % 10);
-		}
-		else {
-			snprintf(TEMP_c, sizeof TEMP_c, 
-				"%2d.%d\u00B0C\n%2d.%d\u00B0C\n%2d.%d\u00B0C", 
-				SOC_temperatureC / 1000, (SOC_temperatureC / 100) % 10, 
-				PCB_temperatureC / 1000, (PCB_temperatureC % 100) % 10,
-				skin_temperaturemiliC / 1000, (skin_temperaturemiliC / 100) % 10);
-		}
+		snprintf(TEMP_c, sizeof TEMP_c, 
+			"%2.1f\u00B0C\n%2.1f\u00B0C\n%2d.%d\u00B0C", 
+			SOC_temperatureF, PCB_temperatureF, skin_temperaturemiliC / 1000, (skin_temperaturemiliC / 100) % 10);
 
 		if (idletick0 > systemtickfrequency_impl) idletick0 = systemtickfrequency_impl;
 		if (idletick1 > systemtickfrequency_impl) idletick1 = systemtickfrequency_impl;
