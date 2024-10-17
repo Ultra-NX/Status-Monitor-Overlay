@@ -263,6 +263,7 @@ public:
 			return;
 
 		mutexLock(&mutex_Misc);
+		
 		snprintf(TEMP_c, sizeof TEMP_c, 
 			"%2.1f\u00B0C\n%2.1f\u00B0C\n%2d.%d\u00B0C", 
 			SOC_temperatureF, PCB_temperatureF, skin_temperaturemiliC / 1000, (skin_temperaturemiliC / 100) % 10);

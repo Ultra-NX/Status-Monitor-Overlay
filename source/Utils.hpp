@@ -27,6 +27,7 @@ extern "C"
 #define BASE_SNS_UOHM 5000
 
 //Common
+bool isMariko = false;
 Thread t0;
 Thread t1;
 Thread t2;
