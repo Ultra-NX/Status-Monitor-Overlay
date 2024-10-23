@@ -159,7 +159,7 @@ public:
 					offset += 3*margin;
 					flags |= 1 << 5;
 				}
-				else if (!key.compare("FAN") && GameRunning && !(flags & 1 << 6)) {
+				else if (!key.compare("FAN") && !(flags & 1 << 6)) {
 					auto dimensions_s = renderer->drawString("FAN", false, offset, base_y+fontsize, fontsize, renderer->a(settings.catColor));
 					offset += dimensions_s.first + margin;
 					auto dimensions_d = renderer->drawString(Rotation_SpeedLevel_c, false, offset, base_y+fontsize, fontsize, renderer->a(settings.textColor));
@@ -175,12 +175,12 @@ public:
 					offset += 3*margin;
 					flags |= 1 << 7;
 				}
-				else if (!key.compare("FPSE") && !(flags & 1 << 8)) {
+				else if (!key.compare("FPSE") && GameRunning && !(flags & 1 << 8)) {
 					auto dimensions_d = renderer->drawString(FPS_var_compressed_c, false, 0, fontsize, fontsize, renderer->a(0x0000));
 					renderer->drawString(FPS_var_compressed_c, false, tsl::cfg::FramebufferWidth - dimensions_d.first, base_y+fontsize, fontsize, renderer->a(settings.textColor));
 					flags |= 1 << 8;
 				}
-				else if (!key.compare("BATB") && GameRunning && !(flags & 1 << 9)) {
+				else if (!key.compare("BATB") && !(flags & 1 << 9)) {
 					auto dimensions_s = renderer->drawString("BAT", false, offset, base_y+fontsize, fontsize, renderer->a(settings.catColor));
 					offset += dimensions_s.first + margin;
 					auto dimensions_d = renderer->drawString(BatteryB_c, false, offset, base_y+fontsize, fontsize, renderer->a(settings.textColor));
