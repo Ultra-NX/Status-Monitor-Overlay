@@ -286,10 +286,10 @@ public:
 		}
 		if (settings.realVolts) { 
 			if (isMariko) {
-				snprintf(MINI_CPU_volt_c, sizeof(MINI_CPU_volt_c), "[%u.%1u mV]", realCPU_mV/1000, (realCPU_mV/100)%10);
+				snprintf(MINI_CPU_volt_c, sizeof(MINI_CPU_volt_c), "| %u.%u mV |", realCPU_mV/1000, (realCPU_mV/100)%10);
 			}
 			else {
-				snprintf(MINI_CPU_volt_c, sizeof(MINI_CPU_volt_c), "[%u.%1u mV]", realCPU_mV/1000, (realCPU_mV/10)%100);
+				snprintf(MINI_CPU_volt_c, sizeof(MINI_CPU_volt_c), "| %u.%u mV |", realCPU_mV/1000, (realCPU_mV/10)%100);
 			} 
 		} 
 		char MINI_GPU_Load_c[14];
@@ -308,10 +308,10 @@ public:
 		}
 		if (settings.realVolts) { 
 			if (isMariko) {
-				snprintf(MINI_GPU_volt_c, sizeof(MINI_GPU_volt_c), "[%u.%1u mV]", realGPU_mV/1000, (realGPU_mV/100)%10);
+				snprintf(MINI_GPU_volt_c, sizeof(MINI_GPU_volt_c), "| %u.%u mV |", realGPU_mV/1000, (realGPU_mV/100)%10);
 			}
 			else {
-				snprintf(MINI_GPU_volt_c, sizeof(MINI_GPU_volt_c), "[%u.%1u mV]", realGPU_mV/1000, (realGPU_mV/10)%100);
+				snprintf(MINI_GPU_volt_c, sizeof(MINI_GPU_volt_c), "| %u.%u mV |", realGPU_mV/1000, (realGPU_mV/10)%100);
 			} 
 		} 
 		
@@ -360,10 +360,10 @@ public:
 			uint32_t vdd2 = realRAM_mV / 10000;
             uint32_t vddq = realRAM_mV % 10000;
 			if (isMariko) {
-				snprintf(MINI_RAM_volt_c, sizeof(MINI_RAM_volt_c), "[%u.%1u/%u.%1u mV]", vdd2/10, vdd2%10, vddq/10, vddq%10);
+				snprintf(MINI_RAM_volt_c, sizeof(MINI_RAM_volt_c), "| %u.%u/%u.%u mV |", vdd2/10, vdd2%10, vddq/10, vddq%10);
 			}
 			else {
-				snprintf(MINI_RAM_volt_c, sizeof(MINI_RAM_volt_c), "[%u.%1u mV]", vdd2/10, vdd2%10);
+				snprintf(MINI_RAM_volt_c, sizeof(MINI_RAM_volt_c), "| %u.%u mV |", vdd2/10, vdd2%10);
 			} 
 		} 
 		
@@ -376,7 +376,7 @@ public:
 
 		char MINI_SOC_volt_c[16] = ""; 
 		if (settings.realVolts) { 
-			snprintf(MINI_SOC_volt_c, sizeof(MINI_SOC_volt_c), "[%u.%1u mV]", realSOC_mV/1000, (realSOC_mV/100)%10);
+			snprintf(MINI_SOC_volt_c, sizeof(MINI_SOC_volt_c), "| %u.%u mV |", realSOC_mV/1000, (realSOC_mV/100)%10);
 		} 
 
 		if (GameRunning && renderCalls_shared && resolutionShow) {
@@ -545,7 +545,7 @@ public:
 		}
 		else snprintf(remainingBatteryLife, sizeof remainingBatteryLife, "--:--");
 		
-		snprintf(SoCPCB_temperature_c, sizeof SoCPCB_temperature_c, "%.1f%s(%+.1fW)[%s]", (float)_batteryChargeInfoFields.RawBatteryCharge / 1000, "%", PowerConsumption, remainingBatteryLife);
+		snprintf(SoCPCB_temperature_c, sizeof SoCPCB_temperature_c, "%.1f%s (%+.1fW) [%s]", (float)_batteryChargeInfoFields.RawBatteryCharge / 1000, "%", PowerConsumption, remainingBatteryLife);
 		mutexUnlock(&mutex_BatteryChecker);
 
 	}
