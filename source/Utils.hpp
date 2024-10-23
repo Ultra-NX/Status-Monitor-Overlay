@@ -1070,7 +1070,7 @@ ALWAYS_INLINE void GetConfigSettings(MiniSettings* settings) {
 	convertStrToRGBA4444("#1117", &(settings -> backgroundColor));
 	convertStrToRGBA4444("#CDEF", &(settings -> catColor));
 	convertStrToRGBA4444("#FFFF", &(settings -> textColor));
-	settings -> show = "CPU+GPU+RAM+TEMP+FAN+DRAW+RES+FPS";
+	settings -> show = "CPU+GPU+RAM+TEMP+DRAW+RES+FPS";
 	settings -> showRAMLoad = true;
 	settings -> refreshRate = 1;
 	settings -> setPos = 0;
