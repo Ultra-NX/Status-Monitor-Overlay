@@ -2,7 +2,6 @@ class MiniOverlay : public tsl::Gui {
 private:
 	uint64_t mappedButtons = MapButtons(keyCombo); // map buttons
 	char GPU_Load_c[32] = "";
-	char Rotation_SpeedLevel_c[64] = "";
 	char RAM_var_compressed_c[128] = "";
 	char SoCPCB_temperature_c[64] = "";
 	char skin_temperature_c[32] = "";
@@ -167,27 +166,20 @@ public:
 					entry_count++;
 					flags |= (1 << 4);
 				}
-				else if (!key.compare("FAN") && !(flags & 1 << 5)) {
-					if (print_text[0])
-						strcat(print_text, "\n");
-					strcat(print_text, "FAN");
-					entry_count++;
-					flags |= (1 << 5);
-				}
-				else if (!key.compare("FPS") && !(flags & 1 << 6) && GameRunning) {
+				else if (!key.compare("FPS") && !(flags & 1 << 5) && GameRunning) {
 					if (print_text[0])
 						strcat(print_text, "\n");
 					strcat(print_text, "FPS");
 					entry_count++;
-					flags |= (1 << 6);
+					flags |= (1 << 5);
 				}
-				else if (!key.compare("RES") && !(flags & 1 << 7) && GameRunning) {
+				else if (!key.compare("RES") && !(flags & 1 << 6) && GameRunning) {
 					if (print_text[0])
 						strcat(print_text, "\n");
 					strcat(print_text, "RES");
 					entry_count++;
 					resolutionShow = true;
-					flags |= (1 << 7);
+					flags |= (1 << 6);
 				}
 			}
 
@@ -369,10 +361,9 @@ public:
 		
 		///Thermal
 		snprintf(skin_temperature_c, sizeof skin_temperature_c, 
-			"%2.1f\u00B0C/%2.1f\u00B0C/%hu.%hhu\u00B0C", 
+			"%2.1f\u00B0C/%2.1f\u00B0C/%hu.%hhu\u00B0C (%2.1f%%)", 
 			SOC_temperatureF, PCB_temperatureF, 
-			skin_temperaturemiliC / 1000, (skin_temperaturemiliC / 100) % 10);
-		snprintf(Rotation_SpeedLevel_c, sizeof Rotation_SpeedLevel_c, "%2.1f%%", Rotation_Duty);
+			skin_temperaturemiliC / 1000, (skin_temperaturemiliC / 100) % 10, Rotation_Duty);
 
 		char MINI_SOC_volt_c[16] = ""; 
 		if (settings.realVolts) { 
@@ -496,30 +487,23 @@ public:
 				}
 				flags |= 1 << 3;			
 			}
-			else if (!key.compare("FAN") && !(flags & 1 << 4)) {
-				if (Temp[0]) {
-					strcat(Temp, "\n");
-				}
-				strcat(Temp, Rotation_SpeedLevel_c);
-				flags |= 1 << 4;			
-			}
-			else if (!key.compare("DRAW") && !(flags & 1 << 5)) {
+			else if (!key.compare("DRAW") && !(flags & 1 << 4)) {
 				if (Temp[0]) {
 					strcat(Temp, "\n");
 				}
 				strcat(Temp, SoCPCB_temperature_c);
-				flags |= 1 << 5;			
+				flags |= 1 << 4;			
 			}
-			else if (!key.compare("FPS") && !(flags & 1 << 6) && GameRunning) {
+			else if (!key.compare("FPS") && !(flags & 1 << 5) && GameRunning) {
 				if (Temp[0]) {
 					strcat(Temp, "\n");
 				}
 				char Temp_s[24] = "";
 				snprintf(Temp_s, sizeof(Temp_s), "%2.1f [%2.1f - %2.1f]", FPSavg, FPSmin, FPSmax);
 				strcat(Temp, Temp_s);
-				flags |= 1 << 6;			
+				flags |= 1 << 5;			
 			}
-			else if (!key.compare("RES") && !(flags & 1 << 7) && GameRunning) {
+			else if (!key.compare("RES") && !(flags & 1 << 6) && GameRunning) {
 				if (Temp[0]) {
 					strcat(Temp, "\n");
 				}
@@ -532,7 +516,7 @@ public:
 				}
 				else snprintf(Temp_s, sizeof(Temp_s), "%dx%d || %dx%d", m_resolutionOutput[0].width, m_resolutionOutput[0].height, m_resolutionOutput[1].width, m_resolutionOutput[1].height);
 				strcat(Temp, Temp_s);
-				flags |= 1 << 7;			
+				flags |= 1 << 6;			
 			}
 		}
 		mutexUnlock(&mutex_Misc);
