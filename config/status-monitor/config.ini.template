@@ -1,7 +1,8 @@
 [status-monitor]
-ultra=Ultra+
+ultra=Ultra
 battery_avg_iir_filter=false
 battery_time_left_refreshrate=60
+average_gpu_load=true
 
 [full]
 refresh_rate=1

@@ -211,15 +211,20 @@ public:
 		else if (performanceMode == ApmPerformanceMode_Normal) {
 			isDocked = false;
 		}
-
-		if (!isDocked && isStarted && FPSavg_old != 0 && FPSavg_old == FPSavg) {
-			if (R_SUCCEEDED(SaltySD_Connect())) {
-				if (R_FAILED(SaltySD_GetDisplayRefreshRate(&refreshRate)))
-					refreshRate = 0;
-				svcSleepThread(100'000'000);
-				SaltySD_Term();
-			}			
+		
+		if (!isDocked && isStarted && FPSavg_old != 0) {
+			uint8_t SaltySharedDisplayRefreshRate = *(uint8_t*)((uintptr_t)shmemGetAddr(&_sharedmemory) + 1);
+			if (SaltySharedDisplayRefreshRate) refreshRate = SaltySharedDisplayRefreshRate;
+			else if (FPSavg_old == FPSavg) {
+				if (R_SUCCEEDED(SaltySD_Connect())) {
+					if (R_FAILED(SaltySD_GetDisplayRefreshRate(&refreshRate)))
+						refreshRate = 0;
+					svcSleepThread(100'000'000);
+					SaltySD_Term();
+				}
+			}
 		}
+
 		if (FPSavg_old == FPSavg)
 			//return;
 			goto read_value;
@@ -230,7 +235,6 @@ public:
 				if (!isDocked && R_SUCCEEDED(SaltySD_Connect())) {
 					if (R_FAILED(SaltySD_GetDisplayRefreshRate(&refreshRate)))
 						refreshRate = 0;
-					svcSleepThread(100'000);
 					SaltySD_Term();
 					isStarted = true;
 				}
