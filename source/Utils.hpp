@@ -1225,7 +1225,7 @@ ALWAYS_INLINE void GetConfigSettings(MicroSettings* settings) {
 	convertStrToRGBA4444("#1113", &(settings -> backgroundColor));
 	convertStrToRGBA4444("#BDFF", &(settings -> catColor));
 	convertStrToRGBA4444("#FFFF", &(settings -> textColor));
-	settings -> show = "CPU+GPU+RAM+BRDB+FPS+BATE";
+	settings -> show = "CPU+GPU+RAM+TMP+FPS+BATE";
 	settings -> showRAMLoad = true;
 	settings -> setPosBottom = false;
 	settings -> refreshRate = 1;

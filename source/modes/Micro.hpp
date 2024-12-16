@@ -10,10 +10,11 @@ private:
 	char CPU_Usage2[32] = "";
 	char CPU_Usage3[32] = "";
 	char CPU_UsageM[32] = "";
+	char soc_temperature_c[32] = "";
 	char skin_temperature_c[32] = "";
 	char skin_temperatureM_c[32] = "";
 	char skin_temperatureB_c[32] = "";
-	char batteryCharge[10] = ""; // Declare the batteryCharge variable
+	//char batteryCharge[10] = ""; // Declare the batteryCharge variable
 	char FPS_var_compressed_c[64] = "";
 	char Battery_c[32];
 	char BatteryB_c[32];
@@ -22,7 +23,7 @@ private:
 	char RAM_volt_c[32];
 	char SOC_volt_c[16];
 
-	uint32_t margin = 4;
+	const uint32_t margin = 4;
 
 	bool Initialized = false;
 	MicroSettings settings;
@@ -120,7 +121,7 @@ public:
 				else if (!key.compare("SOC") && !(flags & 1 << 3)) {
 					auto dimensions_s = renderer->drawString("SOC", false, offset, base_y+fontsize, fontsize, renderer->a(settings.catColor));
 					offset += dimensions_s.first + margin;
-					auto dimensions_d = renderer->drawString(skin_temperature_c, false, offset, base_y+fontsize, fontsize, renderer->a(settings.textColor));
+					auto dimensions_d = renderer->drawString(soc_temperature_c, false, offset, base_y+fontsize, fontsize, renderer->a(settings.textColor));
 					offset += dimensions_d.first + margin;
 					if (settings.realVolts) {
 						auto dimensions_e = renderer->drawString("|", false, offset, base_y+fontsize, fontsize, renderer->a(settings.textColor));
@@ -131,10 +132,10 @@ public:
 					offset += 3*margin;
 					flags |= 1 << 3;
 				}
-				else if (!key.compare("BRD") && !(flags & 1 << 4)) {
-					auto dimensions_s = renderer->drawString("BRD", false, offset, base_y+fontsize, fontsize, renderer->a(settings.catColor));
+				else if ((!key.compare("TMP") || !key.compare("BRDB")) && !(flags & 1 << 4)) {
+					auto dimensions_s = renderer->drawString("TMP", false, offset, base_y+fontsize, fontsize, renderer->a(settings.catColor));
 					offset += dimensions_s.first + margin;
-					auto dimensions_d = renderer->drawString(skin_temperatureM_c, false, offset, base_y+fontsize, fontsize, renderer->a(settings.textColor));
+					auto dimensions_d = renderer->drawString(skin_temperature_c, false, offset, base_y+fontsize, fontsize, renderer->a(settings.textColor));
 					offset += dimensions_d.first + margin;
 					if (settings.realVolts) {
 						auto dimensions_e = renderer->drawString("|", false, offset, base_y+fontsize, fontsize, renderer->a(settings.textColor));
@@ -145,10 +146,10 @@ public:
 					offset += 3*margin;
 					flags |= 1 << 4;
 				}
-				else if (!key.compare("BRDB") && !(flags & 1 << 5)) {
+				else if (!key.compare("BRD") && !(flags & 1 << 5)) {
 					auto dimensions_s = renderer->drawString("BRD", false, offset, base_y+fontsize, fontsize, renderer->a(settings.catColor));
 					offset += dimensions_s.first + margin;
-					auto dimensions_d = renderer->drawString(skin_temperatureB_c, false, offset, base_y+fontsize, fontsize, renderer->a(settings.textColor));
+					auto dimensions_d = renderer->drawString(skin_temperatureM_c, false, offset, base_y+fontsize, fontsize, renderer->a(settings.textColor));
 					offset += dimensions_d.first + margin;
 					if (settings.realVolts) {
 						auto dimensions_e = renderer->drawString("|", false, offset, base_y+fontsize, fontsize, renderer->a(settings.textColor));
@@ -405,23 +406,23 @@ public:
 		else snprintf(remainingBatteryLife, sizeof remainingBatteryLife, "--:--");
 		snprintf(Battery_c, sizeof Battery_c, "%0.2fW | %.1f%s [%s]", PowerConsumption, (float)_batteryChargeInfoFields.RawBatteryCharge / 1000, "%", remainingBatteryLife);
 		snprintf(BatteryB_c, sizeof BatteryB_c, "%.1f%s (%+.1fW) [%s]", (float)_batteryChargeInfoFields.RawBatteryCharge / 1000, "%", PowerConsumption, remainingBatteryLife);
+		mutexUnlock(&mutex_BatteryChecker);
 
 		///Thermal
-		snprintf(skin_temperature_c, sizeof skin_temperature_c, 
+		snprintf(soc_temperature_c, sizeof soc_temperature_c, 
 			"%2.1f\u00B0C(%2.0f%%)", 
 			SOC_temperatureF, 
 			Rotation_Duty);
+		snprintf(skin_temperature_c, sizeof skin_temperature_c, 
+			"%2.1f/%2.1f/%hu.%hhu\u00B0C (%2.1f%%)", 
+			SOC_temperatureF, PCB_temperatureF, 
+			skin_temperaturemiliC / 1000, (skin_temperaturemiliC / 100) % 10,
+			Rotation_Duty);
 		snprintf(skin_temperatureM_c, sizeof skin_temperatureM_c, 
-				"%2.1f/%2.1f/%hu.%hhu\u00B0C@%+.1fW[%s]", 
-				SOC_temperatureF, PCB_temperatureF, 
-				skin_temperaturemiliC / 1000, (skin_temperaturemiliC / 100) % 10, 
-				PowerConsumption, remainingBatteryLife);
-		snprintf(skin_temperatureB_c, sizeof skin_temperatureB_c, 
-				"%2.1f/%2.1f/%hu.%hhu\u00B0C (%2.1f%%)", 
-				SOC_temperatureF, PCB_temperatureF, 
-				skin_temperaturemiliC / 1000, (skin_temperaturemiliC / 100) % 10,
-				Rotation_Duty);
-		mutexUnlock(&mutex_BatteryChecker);
+			"%2.1f/%2.1f/%hu.%hhu\u00B0C@%+.1fW[%s]", 
+			SOC_temperatureF, PCB_temperatureF, 
+			skin_temperaturemiliC / 1000, (skin_temperaturemiliC / 100) % 10, 
+			PowerConsumption, remainingBatteryLife);
 		snprintf(Rotation_SpeedLevel_c, sizeof Rotation_SpeedLevel_c, "%2.1f%%", Rotation_Duty);
 
 		if (settings.realVolts) {
@@ -432,10 +433,8 @@ public:
 		snprintf(FPS_var_compressed_c, sizeof FPS_var_compressed_c, "%2.1f", FPSavg);
 
 		mutexUnlock(&mutex_Misc);
-		
-		
-		
 	}
+
 	virtual bool handleInput(uint64_t keysDown, uint64_t keysHeld, touchPosition touchInput, JoystickPosition leftJoyStick, JoystickPosition rightJoyStick) override {
 		if (isKeyComboPressed(keysHeld, keysDown, mappedButtons)) {
 			TeslaFPS = 60;

@@ -92,18 +92,18 @@ public:
 						if (rectangleWidth < dimensions.first)
 							rectangleWidth = dimensions.first;
 					}
-					else if (!key.compare("FAN")) {
+					/* else if (!key.compare("FAN")) {
 						dimensions = renderer->drawString("100.0%", false, 0, fontsize, fontsize, renderer->a(0x0000));
 						if (rectangleWidth < dimensions.first)
 							rectangleWidth = dimensions.first;
-					}
+					} */
 					else if (!key.compare("FPS")) {
 						dimensions = renderer->drawString("444.4", false, 0, fontsize, fontsize, renderer->a(0x0000));
 						if (rectangleWidth < dimensions.first)
 							rectangleWidth = dimensions.first;
 					}
 					else if (!key.compare("RES")) {
-						dimensions = renderer->drawString("3840x2160 || 3840x2160", false, 0, fontsize, fontsize, renderer->a(0x0000));
+						dimensions = renderer->drawString("3840x2160 or 3840x2160", false, 0, fontsize, fontsize, renderer->a(0x0000));
 						if (rectangleWidth < dimensions.first)
 							rectangleWidth = dimensions.first;
 					}
@@ -514,7 +514,7 @@ public:
 				else if (NxFps -> API == 3) {
 					snprintf(Temp_s, sizeof(Temp_s), "Vulkan");
 				}
-				else snprintf(Temp_s, sizeof(Temp_s), "%dx%d || %dx%d", m_resolutionOutput[0].width, m_resolutionOutput[0].height, m_resolutionOutput[1].width, m_resolutionOutput[1].height);
+				else snprintf(Temp_s, sizeof(Temp_s), "%dx%d or %dx%d", m_resolutionOutput[0].width, m_resolutionOutput[0].height, m_resolutionOutput[1].width, m_resolutionOutput[1].height);
 				strcat(Temp, Temp_s);
 				flags |= 1 << 6;			
 			}
