@@ -8,10 +8,10 @@ private:
 	bool isDocked = false;
 	uint64_t systemtickfrequency_impl = systemtickfrequency;
 	uint32_t cnt = 0;
+	char FPS_var_compressed_c[12] = "";
 	char CPU_Load_c[12] = "";
 	char GPU_Load_c[12] = "";
 	char RAM_Load_c[12] = "";
-	char TEMP_c[32] = "";
 public:
 	bool isStarted = false;
     com_FPSGraph() { 
@@ -180,12 +180,12 @@ public:
 				s16 info_x = base_x+rectangle_width+rectangle_x + 6;
 				s16 info_y = base_y + 3;
 				renderer->drawRect(info_x, 0, rectangle_width /2 - 4, rectangle_height + 12, a(settings.backgroundColor));
-				renderer->drawString("CPU\nGPU\nRAM\nSOC\nPCB\nSKN", false, info_x, info_y+11, 11, renderer->a(settings.borderColor));
+				renderer->drawString("FPS\nCPU\nGPU\nRAM", false, info_x, info_y+11, 11, renderer->a(settings.borderColor));
 
-				renderer->drawString(CPU_Load_c, false, info_x + 40, info_y+11, 11, renderer->a(settings.minFPSTextColor));
-				renderer->drawString(GPU_Load_c, false, info_x + 40, info_y+22, 11, renderer->a(settings.minFPSTextColor));
-				renderer->drawString(RAM_Load_c, false, info_x + 40, info_y+33, 11, renderer->a(settings.minFPSTextColor));
-				renderer->drawString(TEMP_c, false, info_x + 40, info_y+44, 11, renderer->a(settings.minFPSTextColor));
+				renderer->drawString(FPS_var_compressed_c, false, info_x + 40, info_y+11, 11, renderer->a(settings.minFPSTextColor));
+				renderer->drawString(CPU_Load_c, false, info_x + 40, info_y+22, 11, renderer->a(settings.minFPSTextColor));
+				renderer->drawString(GPU_Load_c, false, info_x + 40, info_y+33, 11, renderer->a(settings.minFPSTextColor));
+				renderer->drawString(RAM_Load_c, false, info_x + 40, info_y+44, 11, renderer->a(settings.minFPSTextColor));
 			}
 		});
 
@@ -268,9 +268,7 @@ public:
 
 		mutexLock(&mutex_Misc);
 		
-		snprintf(TEMP_c, sizeof TEMP_c, 
-			"%2.1f\u00B0C\n%2.1f\u00B0C\n%2d.%d\u00B0C", 
-			SOC_temperatureF, PCB_temperatureF, skin_temperaturemiliC / 1000, (skin_temperaturemiliC / 100) % 10);
+		snprintf(FPS_var_compressed_c, sizeof FPS_var_compressed_c, "%2.1f", FPSavg);
 
 		if (idletick0 > systemtickfrequency_impl) idletick0 = systemtickfrequency_impl;
 		if (idletick1 > systemtickfrequency_impl) idletick1 = systemtickfrequency_impl;
