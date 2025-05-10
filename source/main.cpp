@@ -251,6 +251,18 @@ public:
 				}
 				else sysclkCheck = 0;
 			}
+			u64 sku = 0;
+		    if (R_SUCCEEDED(splInitialize())) {
+				splGetConfig(SplConfigItem_HardwareType, &sku);
+				switch(sku) {
+					case 2 ... 5:
+						isMariko = true;
+						break;
+					default:
+						isMariko = false;
+				}
+			}
+			splExit();
 		});
 		Hinted = envIsSyscallHinted(0x6F);
 	}
@@ -321,6 +333,18 @@ public:
 				}
 				else sysclkCheck = 0;
 			}
+			u64 sku = 0;
+			if (R_SUCCEEDED(splInitialize())) {
+				splGetConfig(SplConfigItem_HardwareType, &sku);
+				switch(sku) {
+					case 2 ... 5:
+						isMariko = true;
+						break;
+					default:
+						isMariko = false;
+				}
+			}
+			splExit();
 		});
 		Hinted = envIsSyscallHinted(0x6F);
 	}
