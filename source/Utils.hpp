@@ -1142,11 +1142,11 @@ ALWAYS_INLINE void GetConfigSettings(MiniSettings* settings) {
 		convertToUpper(key);
 		settings -> realFrequencies = !(key.compare("TRUE"));
 	}
-	if (parsedData[mode].find("real_volts") != parsedData[mode].end()) {  
-		key = parsedData[mode]["real_volts"];  
-		convertToUpper(key);  
-		settings -> realVolts = !(key.compare("TRUE"));  
-	} 
+	if (parsedData[mode].find("real_volts") != parsedData[mode].end()) {
+		key = parsedData[mode]["real_volts"];
+		convertToUpper(key);
+		settings -> realVolts = !(key.compare("TRUE"));
+	}
 
 	long maxFontSize = 32;
 	long minFontSize = 8;
@@ -1261,23 +1261,23 @@ ALWAYS_INLINE void GetConfigSettings(MicroSettings* settings) {
 		}
 		else if (rate > maxFPS)
 			settings -> refreshRate = maxFPS;
-		else settings -> refreshRate = rate;	
+		else settings -> refreshRate = rate;
 	}
 	if (parsedData[mode].find("real_freqs") != parsedData[mode].end()) {
 		key = parsedData[mode]["real_freqs"];
 		convertToUpper(key);
 		settings -> realFrequencies = !(key.compare("TRUE"));
 	}
-	if (parsedData[mode].find("real_volts") != parsedData[mode].end()) {  
-		key = parsedData["micro"]["real_volts"];  
-		convertToUpper(key);  
-		settings -> realVolts = !(key.compare("TRUE"));  
-	}  
-	if (parsedData[mode].find("show_full_cpu") != parsedData[mode].end()) { 
-		key = parsedData[mode]["show_full_cpu"]; 
-		convertToUpper(key); 
-		settings -> showFullCPU = key.compare("FALSE"); 
-	} 
+	if (parsedData[mode].find("real_volts") != parsedData[mode].end()) {
+		key = parsedData[mode]["real_volts"];
+		convertToUpper(key);
+		settings -> realVolts = !(key.compare("TRUE"));
+	}
+	if (parsedData[mode].find("show_full_cpu") != parsedData[mode].end()) {
+		key = parsedData[mode]["show_full_cpu"];
+		convertToUpper(key);
+		settings -> showFullCPU = key.compare("FALSE");
+	}
 	if (parsedData[mode].find("text_align") != parsedData[mode].end()) {
 		key = parsedData[mode]["text_align"];
 		convertToUpper(key);
@@ -1530,8 +1530,8 @@ ALWAYS_INLINE void GetConfigSettings(FpsGraphSettings* settings) {
 		if (convertStrToRGBA4444(key, &temp))
 			settings -> perfectLineColor = temp;
 	}
-	if (parsedData["fps-graph"].find("show_info") != parsedData["fps-graph"].end()) {
-		key = parsedData["fps-graph"]["show_info"];
+	if (parsedData[mode].find("show_info") != parsedData[mode].end()) {
+		key = parsedData[mode]["show_info"];
 		convertToUpper(key);
 		settings -> showInfo = !(key.compare("TRUE"));
 	}
